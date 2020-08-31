@@ -9,7 +9,7 @@ target = "index.html"
 
 # more time and I would go through searching for loads to
 # do this automatically - todo
-code = ["scm/helloworld.jscm"]
+code = ["scm/warpweighted.jscm"]
 
 resources = [ 
     "flx/scm/base.jscm",
@@ -32,7 +32,11 @@ resources = [
     
     "flx/scm/canvas.jscm",
     "flx/scm/canvas-widgets.jscm",
-    
+
+    "scm/extruder.jscm",
+    "scm/path-builder.jscm",
+    "scm/weave-builder.jscm",
+
     "shaders/default.vert",
     "shaders/default.frag",
     

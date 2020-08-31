@@ -1,0 +1,3 @@
+[submodule "flx"]
+	path = flx
+	url = https://github.com/fo-am/flx.git

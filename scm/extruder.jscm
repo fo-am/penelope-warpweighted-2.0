@@ -1,0 +1,39 @@
+;; -*- mode: scheme; -*-
+
+(load "flx/scm/fluxus.jscm")
+
+;;---------------------------------------------
+
+(define (extruder pos rot dist i width)
+  (list pos rot dist i width))
+
+(define (extruder-pos e) (list-ref e 0))
+(define (extruder-rot e) (list-ref e 1))
+(define (extruder-modify-rot e v) (list-replace e 1 v))
+(define (extruder-dist e) (list-ref e 2))
+(define (extruder-i e) (list-ref e 3))
+(define (extruder-width e) (list-ref e 4))
+
+(define (extruder-run e)
+  (let ((v (qmulvec (extruder-rot e) (vector 1 0 0))))
+    (let ((p (vadd (extruder-pos e) (vmul v (* 0.5 (extruder-dist e)))))
+	  (tangent (vnormalise (vcross v (vector 0 0 1)))))
+
+      (pdata-set! "p" (extruder-i e) (vadd p (vmul tangent (* (extruder-width e) -0.5))))
+      (pdata-set! "p" (+ (extruder-i e) 1) (vadd p (vmul tangent (* (extruder-width e) 0.5))))
+
+      (let ((t (/ (modulo (extruder-i e) 50) 50)))
+	(pdata-set! "t" (extruder-i e) (vector t 1 0))
+	(pdata-set! "t" (+ (extruder-i e) 1) (vector t 0 0)))
+
+      (pdata-set! "n" (extruder-i e) (vnormalise (vadd (vector 0.5 1 -1) (vmul tangent -1))))
+      (pdata-set! "n" (+ (extruder-i e) 1) (vnormalise (vadd (vector 0.5 1 -1) tangent)))
+      )
+    (pdata-upload!)
+    (extruder
+     (vadd (extruder-pos e) (vmul v (extruder-dist e)))
+     (extruder-rot e)
+     (extruder-dist e)
+     (+ (extruder-i e) 2)
+     (extruder-width e))))
+

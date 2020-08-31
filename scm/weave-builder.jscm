@@ -1,0 +1,50 @@
+;; -*- mode: scheme; -*-
+
+(load "flx/scm/fluxus.jscm")
+(load "scm/path-builder.jscm")
+
+;;------------------------------------------------------------
+
+;; produces lists of code for each weft thread
+
+;; avoid repeating u/d and insert f instead
+(define (weave->instr kernel-code last warp)
+  (if warp
+      (if (zero? kernel-code)
+	  (if (eq? last "d") "f" "d")  ;; 1 = warp over
+	  (if (eq? last "u") "f" "u"))
+      (if (zero? kernel-code)
+	  (if (eq? last "u") "f" "u")  ;; 1 = warp over
+	  (if (eq? last "d") "f" "d"))))
+
+(define (kernel-row k i)
+  (list-ref k i))
+
+(define (kernel-col k i)
+  (map
+   (lambda (row)
+     (list-ref row i))
+   k))
+
+(define (weave-builder warp kernel threads last)
+  (let ((i (modulo threads (length kernel))))
+    (cond
+     ((zero? threads) '())
+     (else
+      (let ((instr (weave->instr (list-ref kernel i) last warp)))
+	(cons instr (weave-builder warp kernel (- threads 1) instr)))))))
+
+(define (weave-builder-weft kernel weft-threads warp-threads)
+  (let ((i (modulo weft-threads (length kernel))))
+    (cond
+     ((zero? weft-threads) '())
+     (else
+      (append
+       (weave-builder 0 (kernel-row kernel i) warp-threads "?")
+       (if (zero? (modulo weft-threads 2)) (list "r" "r") (list "l" "l"))
+       (weave-builder-weft kernel (- weft-threads 1) warp-threads))))))
+
+(define (weave-builder-warp kernel weft-threads warp-thread)
+  (weave-builder
+   1 (kernel-col kernel (modulo warp-thread (length kernel)))
+   weft-threads "?"))

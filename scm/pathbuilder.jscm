@@ -1,0 +1,62 @@
+;; -*- mode: scheme; -*-
+
+(load "flx/scm/fluxus.jscm")
+(load "extruder.jscm")
+
+(define (path-builder code pos segs seg extruder)
+  (list code pos segs seg extruder))
+
+(define (path-builder-code p) (list-ref p 0))
+(define (path-builder-pos p) (list-ref p 1))
+(define (path-builder-segs p) (list-ref p 2))
+(define (path-builder-seg p) (list-ref p 3))
+(define (path-builder-extruder p) (list-ref p 4))
+
+(define (path-builder-run p)
+  (let ((instr (list-ref (path-builder-code p)
+			 (path-builder-pos p)))
+	(last-seg (>= (path-builder-seg p) (- (path-builder-segs p) 1))))
+    (path-builder
+     (path-builder-code p)
+     (if last-seg
+	 (modulo (+ (path-builder-pos p) 1) (length (path-builder-code p)))
+	 (path-builder-pos p))
+     (path-builder-segs p)
+     (if last-seg
+	 0
+	 (+ (path-builder-seg p) 1))
+     (let ((e (path-builder-extruder p)))
+       (cond
+	((eq? instr "f")
+	 (extruder-run e))
+	((eq? instr "r")
+	 (extruder-run
+	  (extruder-modify-rot
+	   e (qmul
+	      (extruder-rot e)
+	      (qaxisangle (vector 0 0 1)
+			  (/ -90 (path-builder-segs p)))))))
+	((eq? instr "l")
+	 (extruder-run
+	  (extruder-modify-rot
+	   e (qmul
+	      (extruder-rot e)
+	      (qaxisangle (vector 0 0 1)
+			  (/ 90 (path-builder-segs p)))))))
+	((eq? instr "u")
+	 (extruder-run
+	  (extruder-modify-rot
+	   e (qmul
+	      (extruder-rot e)
+	      (qaxisangle (vector 0 1 0)
+			  (* (cos (* (/ (path-builder-seg p)
+					(- (path-builder-segs p) 1)) pi)) -25))))))
+	((eq? instr "d")
+	 (extruder-run
+	  (extruder-modify-rot
+	   e (qmul
+	      (extruder-rot e)
+	      (qaxisangle (vector 0 1 0)
+			  (* (cos (* (/ (path-builder-seg p)
+					(- (path-builder-segs p) 1)) pi)) 25))))))
+	(else e))))))
