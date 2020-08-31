@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>hello world</title>
+    <body>
+      <canvas class="canvas" id="webgl-canvas" width="960" height="540"></canvas>
+      <canvas class="canvas" id="canvas" width="960" height="540"></canvas>
+      <div class="code-container" style="display: none;">
+	<textarea id="code"></textarea>
+	output
+	<pre><div id="output"></div></pre>
+      </div>
+    </body>
+    <script src="js/jquery-1.9.1.min.js"></script>
+    <script src="flx/js/glMatrix.js"></script>
+    <script src="flx/js/glObjLoader.js"></script>
+    <script src="flx/js/glPlyLoader.js"></script>
+    <script src="flx/js/ditto.js"></script>
+    <script>
+      $( document ).ready(function() {
+          init_resources({{RESOURCES}});
+          init_static('{{SYNTAX}}','{{CODE}}');    
+      });
+    </script>
+</body>
+</html>

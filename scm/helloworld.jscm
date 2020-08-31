@@ -1,0 +1,214 @@
+;; -*- mode: scheme; -*-
+
+(load "flx/scm/fluxus.jscm")
+(load "flx/scm/canvas.jscm")
+
+(load-mesh-cache "models/receptor-donut.obj")
+
+;;---------------------------------------------
+
+
+;;---------------------------------------------
+
+(define (extruder pos rot dist i width n)
+  (list pos rot dist i width n))
+
+(define (extruder-pos e) (list-ref e 0))
+(define (extruder-rot e) (list-ref e 1))
+(define (extruder-modify-rot e v) (list-replace e 1 v))
+(define (extruder-dist e) (list-ref e 2))
+(define (extruder-i e) (list-ref e 3))
+(define (extruder-width e) (list-ref e 4))
+(define (extruder-n e) (list-ref e 5))
+
+(define (extruder-run e)
+  (let ((v (qmulvec (extruder-rot e) (vector 1 0 0))))
+    (let ((p (vadd (extruder-pos e) (vmul v (* 0.5 (extruder-dist e)))))
+	  (tangent (vnormalise (vcross v (vector 0 0 1)))))
+
+      (pdata-set! "p" (extruder-i e) (vadd p (vmul tangent (* (extruder-width e) -0.5))))
+      (pdata-set! "p" (+ (extruder-i e) 1) (vadd p (vmul tangent (* (extruder-width e) 0.5))))
+
+      (let ((t (/ (modulo (extruder-i e) 50) 50)))
+	(pdata-set! "t" (extruder-i e) (vector t 1 0))
+	(pdata-set! "t" (+ (extruder-i e) 1) (vector t 0 0)))
+
+      (pdata-set! "n" (extruder-i e) (vnormalise (vadd (vector 0.5 1 -1) (vmul tangent -1))))
+      (pdata-set! "n" (+ (extruder-i e) 1) (vnormalise (vadd (vector 0.5 1 -1) tangent)))
+      )
+    (pdata-upload!)
+    (extruder
+     (vadd (extruder-pos e) (vmul v (extruder-dist e)))
+     (extruder-rot e)
+     (extruder-dist e)
+     (+ (extruder-i e) 2)
+     (extruder-width e)
+     (extruder-n e))))
+
+;;---------------------------------------------------
+
+(define (path-builder code pos segs seg extruder)
+  (list code pos segs seg extruder))
+
+(define (path-builder-code p) (list-ref p 0))
+(define (path-builder-pos p) (list-ref p 1))
+(define (path-builder-segs p) (list-ref p 2))
+(define (path-builder-seg p) (list-ref p 3))
+(define (path-builder-extruder p) (list-ref p 4))
+
+(define (path-builder-run p)
+  (let ((instr (list-ref (path-builder-code p)
+			 (path-builder-pos p)))
+	(last-seg (>= (path-builder-seg p) (- (path-builder-segs p) 1))))
+    (path-builder
+     (path-builder-code p)
+     (if last-seg
+	 (modulo (+ (path-builder-pos p) 1) (length (path-builder-code p)))
+	 (path-builder-pos p))
+     (path-builder-segs p)
+     (if last-seg
+	 0
+	 (+ (path-builder-seg p) 1))
+     (let ((e (path-builder-extruder p)))
+       (cond
+	((eq? instr "f")
+	 (extruder-run e))
+	((eq? instr "r")
+	 (extruder-run
+	  (extruder-modify-rot
+	   e (qmul
+	      (extruder-rot e)
+	      (qaxisangle (vector 0 0 1)
+			  (/ -90 (path-builder-segs p)))))))
+	((eq? instr "l")
+	 (extruder-run
+	  (extruder-modify-rot
+	   e (qmul
+	      (extruder-rot e)
+	      (qaxisangle (vector 0 0 1)
+			  (/ 90 (path-builder-segs p)))))))
+	((eq? instr "u")
+	 (extruder-run
+	  (extruder-modify-rot
+	   e (qmul
+	      (extruder-rot e)
+	      (qaxisangle (vector 0 1 0)
+			  (* (cos (* (/ (path-builder-seg p)
+					(- (path-builder-segs p) 1)) pi)) -25))))))
+	((eq? instr "d")
+	 (extruder-run
+	  (extruder-modify-rot
+	   e (qmul
+	      (extruder-rot e)
+	      (qaxisangle (vector 0 1 0)
+			  (* (cos (* (/ (path-builder-seg p)
+					(- (path-builder-segs p) 1)) pi)) 25))))))
+	(else e))))))
+
+;;------------------------------------------------------------
+
+(define (yarn->code width gap)
+  (append
+   (build-list width (lambda (_) "f"))
+   (list "r")
+   (build-list gap (lambda (_) "f"))
+   (list "r")
+   (build-list width (lambda (_) "f"))
+   (list "l")
+   (build-list gap (lambda (_) "f"))
+   (list "l")))
+
+;;------------------------------------------------------------
+
+;; produces lists of code for each weft thread
+
+;; avoid repeating u/d and insert f instead
+(define (weave->instr kernel-code last warp)
+  (if warp
+      (if (zero? kernel-code)
+	  (if (eq? last "d") "f" "d")  ;; 1 = warp over
+	  (if (eq? last "u") "f" "u"))
+      (if (zero? kernel-code)
+	  (if (eq? last "u") "f" "u")  ;; 1 = warp over
+	  (if (eq? last "d") "f" "d"))))
+
+(define (kernel-row k i)
+  (list-ref k i))
+
+(define (kernel-col k i)
+  (map
+   (lambda (row)
+     (list-ref row i))
+   k))
+
+(define (weave-builder warp kernel threads last)
+  (let ((i (modulo threads (length kernel))))
+    (cond
+     ((zero? threads) '())
+     (else
+      (let ((instr (weave->instr (list-ref kernel i) last warp)))
+	(cons instr (weave-builder warp kernel (- threads 1) instr)))))))
+
+(define (weave-builder-weft kernel weft-threads warp-threads)
+  (let ((i (modulo weft-threads (length kernel))))
+    (cond
+     ((zero? weft-threads) '())
+     (else
+      (append
+       (weave-builder 0 (kernel-row kernel i) warp-threads "?")
+       (if (zero? (modulo weft-threads 2)) (list "r" "r") (list "l" "l"))
+       (weave-builder-weft kernel (- weft-threads 1) warp-threads))))))
+
+(define (weave-builder-warp kernel weft-threads warp-thread)
+  (weave-builder
+   1 (kernel-col kernel (modulo warp-thread (length kernel)))
+   weft-threads "?"))
+
+;;------------------------------------------------------------
+
+
+
+
+
+(define p 0)
+(define pb (path-builder
+	    (dbg (weave-builder-weft (list
+				      (list 1 1 0 0)
+				      (list 1 0 0 1)
+				      (list 0 0 1 1)
+				      (list 0 1 1 0))
+				     8 16))
+	    0 5 0
+	    (extruder
+	     (vector -5 5 0)
+	     (qaxisangle (vector 0 0 1) 0)
+	     0.2
+	     0 0.7 (vector 0 0 1))))
+
+
+
+
+
+
+(define (build)
+  (console.log "building")
+  (texture (load-texture "thread.png"))
+  (set! p (build-polygons 'triangle-strip (* 1000 2)))
+  (with-primitive
+   p
+   (pdata-map! (lambda (c) (vector 1 1 1)) "c")
+   (rotate (vector 0 20 0))
+   ))
+
+(define (render)
+  (set! pb (with-primitive p (path-builder-run pb))))
+
+(canvas-setup)
+;;(clear-colour (list 0 1.0 0 0))
+(set-camera-angle 25)
+(set-camera-transform (mtranslate (midentity) (vector 0 0 -38)))
+(resize-glcanvas webgl-canvas)
+
+(build)
+
+(every-frame (render))
