@@ -1,0 +1,124 @@
+;; -*- mode: scheme; -*-
+(load "flx/scm/fluxus.jscm")
+
+(define weave-height 0.5)
+
+(define (build-parts)
+  (list
+   ;; forward up	
+   (let ((p (build-polygons 'triangles 6)))    
+     (with-primitive
+      p
+      (hide 1)
+      (pdata-set! "p" 0 (vector 0 0 weave-height))
+      (pdata-set! "p" 1 (vector 1 0 weave-height))
+      (pdata-set! "p" 2 (vector 1 1 weave-height))
+      (pdata-set! "p" 3 (vector 0 0 weave-height))
+      (pdata-set! "p" 4 (vector 0 1 weave-height))
+      (pdata-set! "p" 5 (vector 1 1 weave-height))
+      (pdata-map! (lambda (c) (vector 1 1 1)) "c")
+      (pdata-map! (lambda (n) (vector 0 0 -1)) "n")
+      (pdata-upload!))
+     p)
+
+   ;; forward down
+   (let ((p (build-polygons 'triangles 6)))    
+     (with-primitive
+      p
+      (hide 1)
+      (pdata-set! "p" 0 (vector 0 0 -weave-height))
+      (pdata-set! "p" 1 (vector 1 0 -weave-height))
+      (pdata-set! "p" 2 (vector 1 1 -weave-height))
+      (pdata-set! "p" 3 (vector 0 0 -weave-height))
+      (pdata-set! "p" 4 (vector 0 1 -weave-height))
+      (pdata-set! "p" 5 (vector 1 1 -weave-height))
+      (pdata-map! (lambda (c) (vector 1 1 1)) "c")
+      (pdata-map! (lambda (n) (vector 0 0 -1)) "n")
+      (pdata-upload!))
+     p)
+   
+   ;; right
+   (let ((p (build-polygons 'triangle-fan 13)))    
+     (with-primitive
+      p
+      (hide 1)
+      (pdata-index-map!
+       (lambda (i p)  
+	 (if (zero? i)
+	     (vector 0 0 0)
+	     (let ((a (* (/ (- i 1) 11) 0.5 pi)))
+	       (vector (cos a) (sin a) 0))))
+       "p")
+      (pdata-map! (lambda (c) (vector 1 1 1)) "c")
+      (pdata-map! (lambda (n) (vector 0 0 -1)) "n")
+      (pdata-upload!))
+     p)
+
+   ;; left
+   (let ((p (build-polygons 'triangle-fan 13)))    
+     (with-primitive
+      p
+      (hide 1)
+      (pdata-index-map!
+       (lambda (i p)  
+	 (if (zero? i)
+	     (vector 0 1 0)
+	     (let ((a (* (/ (- (- i 1) 11) 11) 0.5 pi)))
+	       (vector (cos a) (+ (sin a) 1) 0))))
+       "p")
+      (pdata-map! (lambda (c) (vector 1 1 1)) "c")
+      (pdata-map! (lambda (n) (vector 0 0 -1)) "n")
+      (pdata-upload!))
+     p)
+
+   ;; up
+   (let ((p (build-polygons 'triangle-strip 24)))    
+     (with-primitive
+      p
+      (hide 1)
+      (rotate (vector 45 0 0))
+      (pdata-index-map!
+       (lambda (i p)
+	 (vector
+	  (/ (quotient i 2) 11)
+	  (modulo i 2)
+	  (* (cos (* pi (/ (quotient i 2) 12))) -weave-height)))
+       "p")
+      (pdata-map! (lambda (c) (vector 1 1 1)) "c")
+      (pdata-index-map!
+       (lambda (i n)
+	 (if (or (< i 2))
+	     (vector 0 0 -1)
+	     (vcross
+	      (vnormalise (vsub (pdata-ref "p" (- i 2)) (pdata-ref "p" i)))
+	      (vector 0 1 0))))	  
+       "n")
+      (pdata-upload!))
+     p)
+
+   ;; down
+   (let ((p (build-polygons 'triangle-strip 24)))    
+     (with-primitive
+      p
+      (hide 1)
+      (rotate (vector 45 0 0))
+      (pdata-index-map!
+       (lambda (i p)
+	 (vector
+	  (/ (quotient i 2) 11)
+	  (modulo i 2)
+	  (* (cos (* pi (/ (quotient i 2) 12))) weave-height)))
+       "p")
+      (pdata-map! (lambda (c) (vector 1 1 1)) "c")
+      (pdata-index-map!
+       (lambda (i n)
+	 (if (or (< i 2))
+	     (vector 0 0 -1)
+	     (vcross
+	      (vnormalise (vsub (pdata-ref "p" (- i 2)) (pdata-ref "p" i)))
+	      (vector 0 1 0))))	  
+       "n")
+      (pdata-upload!))
+     p)))
+
+

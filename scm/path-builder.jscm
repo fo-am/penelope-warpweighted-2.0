@@ -25,38 +25,45 @@
      (if last-seg
 	 0
 	 (+ (path-builder-seg p) 1))
-     (let ((e (path-builder-extruder p)))
+     (let ((e (if (zero? (path-builder-seg p))
+		  ;; snap to logical pos
+		  (extruder-update-logical (path-builder-extruder p) instr)
+		  (path-builder-extruder p))))
        (cond
 	((eq? instr "f")
-	 (extruder-run e))
+	 (extruder-run (extruder-modify-dist e 0.2)))
 	((eq? instr "r")
 	 (extruder-run
 	  (extruder-modify-rot
-	   e (qmul
-	      (extruder-rot e)
-	      (qaxisangle (vector 0 0 1)
-			  (/ -90 (path-builder-segs p)))))))
+	   (extruder-modify-dist e 0.2)
+	   (qmul
+	    (extruder-rot e)
+	    (qaxisangle (vector 0 0 1)
+			(/ -90 (path-builder-segs p)))))))
 	((eq? instr "l")
 	 (extruder-run
 	  (extruder-modify-rot
-	   e (qmul
-	      (extruder-rot e)
-	      (qaxisangle (vector 0 0 1)
-			  (/ 90 (path-builder-segs p)))))))
+	   (extruder-modify-dist e 0.2)
+	   (qmul
+	    (extruder-rot e)
+	    (qaxisangle (vector 0 0 1)
+			(/ 90 (path-builder-segs p)))))))
 	((eq? instr "u")
 	 (extruder-run
-	  (extruder-modify-rot
-	   e (qmul
-	      (extruder-rot e)
-	      (qaxisangle (vector 0 1 0)
-			  (* (cos (* (/ (path-builder-seg p)
-					(- (path-builder-segs p) 1)) pi)) -25))))))
+	  (extruder-modify-rot	
+	   (extruder-modify-dist e 0.3)
+	   (qmul
+	    (extruder-rot e)
+	    (qaxisangle (vector 0 1 0)
+			(* (cos (* (/ (path-builder-seg p)
+				      (- (path-builder-segs p) 1)) pi)) -45))))))
 	((eq? instr "d")
 	 (extruder-run
 	  (extruder-modify-rot
-	   e (qmul
-	      (extruder-rot e)
-	      (qaxisangle (vector 0 1 0)
-			  (* (cos (* (/ (path-builder-seg p)
-					(- (path-builder-segs p) 1)) pi)) 25))))))
+	   (extruder-modify-dist e 0.3)
+	   (qmul
+	    (extruder-rot e)
+	    (qaxisangle (vector 0 1 0)
+			(* (cos (* (/ (path-builder-seg p)
+				      (- (path-builder-segs p) 1)) pi)) 45))))))
 	(else e))))))

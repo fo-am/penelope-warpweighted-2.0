@@ -4,27 +4,11 @@
 (load "flx/scm/canvas.jscm")
 
 (load "scm/weave-builder.jscm")
+(load "scm/constructor.jscm")
+(load "scm/parts.jscm")
 
 (load-mesh-cache "models/receptor-donut.obj")
 
-(define (build-loom-prim size)
-  (let ((p (build-polygons 'triangle-strip (* size 2))))
-    (with-primitive p (pdata-map! (lambda (c) (vector 1 1 1)) "c"))
-    p))
-
-(define (loom-element path-builder prim)
-  (list path-builder prim))
-
-(define (loom-element-path-builder e) (list-ref e 0))
-(define (loom-element-prim e) (list-ref e 1))
-
-(define (loom-element-update e)
-  (loom-element
-   (with-primitive
-    (loom-element-prim e)
-    (path-builder-run
-     (loom-element-path-builder e)))
-   (loom-element-prim e)))
 
 (define (loom warp weft)
   (list warp weft))
@@ -38,74 +22,82 @@
 (define (build-loom kernel warp-threads weft-threads)
   (loom
    (build-list
-    4 (lambda (i)
-	 (loom-element
-	  (path-builder
-	   (weave-builder-warp kernel warp-threads i)
-	   0 5 0 ;; pos segs seg
-	   (extruder
-	    (vector i 0 0) ;; startpos
-	    (qaxisangle (vector 0 0 1) -90) ;; startrot
-	    0.278 ;; dist per seg
-	    0   ;; i
-	    0.7)) ;; width	 
-	  (build-loom-prim 500))))
+    0 (lambda (i)
+	 (constructor
+	  (weave-builder-warp kernel warp-threads i)
+	  0 (midentity) '())))
    (build-list
     1 (lambda (i)
-	(loom-element
-	 (path-builder
-	  (weave-builder-weft kernel warp-threads weft-threads)
-	  0 5 0 ;; pos segs seg
-	  (extruder
-	   (vector 0 -0.8 -0.2) ;; startpos
-	   (qaxisangle (vector 0 0 1) 0) ;; startrot
-	   0.2 ;; dist per seg
-	   0   ;; i
-	   0.7)) ;; width	 
-	 (build-loom-prim 1000))))))
+	(constructor
+	 ;;(list "f" "f" "f" "f" "l" "l" "f")
+	 (dbg (weave-builder-weft kernel warp-threads weft-threads))
+	 0 (midentity) '())))))
 
-(define (loom-update l)
+(define (loom-update l parts)
   (loom
-   (map (lambda (e) (loom-element-update e)) (loom-warp l))
-   (map (lambda (e) (loom-element-update e)) (loom-weft l))))
+   (map (lambda (e) (constructor-update e parts)) (loom-warp l))
+   (map (lambda (e) (constructor-update e parts)) (loom-weft l))))
 
 ;;---------------------------------------------------------
 
 (define l 0)
 (define loom-root 0)
-
-(define (build)
-  (console.log "building")
-  (set! loom-root (with-state
-		   (translate (vector -5 5 0))
-		   (build-locator)))
-  (with-state
-   (parent loom-root)
-   (texture (load-texture "thread.png"))
-   (set! l (build-loom
-	    (list
-	     (list 0 1)
-	     (list 1 0))
-	    4 12))))
-
+(define parts '())
 
 (define f 0)
+  
+(define (build)
+  
+  
+  (console.log "building")
+  (set! parts (build-parts))
+  (set! loom-root (with-state
+  		   (translate (vector -5 5 0))
+  		   (rotate (vector 30 0 0))
+  		   (build-locator)))
+  (with-state
+   (parent loom-root)
+   (shader-assign-compiled "default")  
+
+   ;;(texture (load-texture "thread.png"))
+   (set! l (build-loom
+  	    (list
+  	     (list 0 1 1 1)
+  	     (list 0 1 1 1)	     
+  	     (list 0 1 1 1)
+  	     (list 0 1 1 1)	     
+  	     )
+  	    8 16)))
+  
+  )
+
+(msg (weave-builder-weft
+      (list
+       (list 1 0 0 0 0)
+       (list 1 0 0 0 0))
+      2 5))
+
+(msg (reverse (list 1 0 0 0 0)))
 
 (define (render)
-  (when (< f 500)
-	(set! l (loom-update l)))
-
+  (with-state
+   (parent loom-root)
+   (set! l (loom-update l parts)))
   (with-primitive
    loom-root
    (rotate (vector 0 0 0)))
-  (set! f (+ f 1))
-  )
+  (set! f (+ f 1)))
 
 (canvas-setup)
 ;;(clear-colour (list 0 1.0 0 0))
 (set-camera-angle 25)
 (set-camera-transform (mtranslate (midentity) (vector 0 0 -38)))
 (resize-glcanvas webgl-canvas)
+
+(shader-compile "default" (list "p" "n" "t" "c")
+		"shaders/default.vert"
+		"shaders/default.frag")
+
 
 (build)
 

@@ -33,8 +33,8 @@ resources = [
     "flx/scm/canvas.jscm",
     "flx/scm/canvas-widgets.jscm",
 
-    "scm/extruder.jscm",
-    "scm/path-builder.jscm",
+    "scm/parts.jscm",
+    "scm/constructor.jscm",
     "scm/weave-builder.jscm",
 
     "shaders/default.vert",

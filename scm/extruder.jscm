@@ -8,9 +8,11 @@
   (list pos rot dist i width))
 
 (define (extruder-pos e) (list-ref e 0))
+(define (extruder-modify-pos e v) (list-replace e 0 v))
 (define (extruder-rot e) (list-ref e 1))
 (define (extruder-modify-rot e v) (list-replace e 1 v))
 (define (extruder-dist e) (list-ref e 2))
+(define (extruder-modify-dist e v) (list-replace e 2 v))
 (define (extruder-i e) (list-ref e 3))
 (define (extruder-width e) (list-ref e 4))
 
@@ -28,6 +30,11 @@
 
       (pdata-set! "n" (extruder-i e) (vnormalise (vadd (vector 0.5 1 -1) (vmul tangent -1))))
       (pdata-set! "n" (+ (extruder-i e) 1) (vnormalise (vadd (vector 0.5 1 -1) tangent)))
+
+      (let ((c (list-ref (list (vector 1 0 0) (vector 0 0 1)) (modulo (quotient (extruder-i e) 10) 2))))
+	(pdata-set! "c" (extruder-i e) c)
+	(pdata-set! "c" (+ (extruder-i e) 1) c))
+      
       )
     (pdata-upload!)
     (extruder
@@ -36,4 +43,7 @@
      (extruder-dist e)
      (+ (extruder-i e) 2)
      (extruder-width e))))
+
+(define (extruder-update-logical e instr)
+  e)
 

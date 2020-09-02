@@ -1,0 +1,45 @@
+;; -*- mode: scheme; -*-
+
+(load "flx/scm/fluxus.jscm")
+
+(define (constructor code pc tx prims)
+  (list code pc tx prims))
+
+(define (constructor-code p) (list-ref p 0))
+(define (constructor-pc p) (list-ref p 1))
+(define (constructor-tx p) (list-ref p 2))
+(define (constructor-prims p) (list-ref p 3))
+
+(define (constructor-update-tx tx instr)
+  (cond
+   ((eq? instr "r") (mrotate tx (vector 0 0 1) (* -90 rad-conv)))
+   ((eq? instr "l") (mtranslate
+		     (mrotate tx (vector 0 0 1) (* 90 rad-conv))
+		     (vector 1 -1 0)))
+   (else (mtranslate tx (vector 1 0 0)))))
+
+
+(define (constructor-build-part c instr parts)
+  (with-state
+   (concat (constructor-tx c))
+   (cond
+    ((eq? instr "fu") (build-instance (list-ref parts 0)))
+    ((eq? instr "fd") (build-instance (list-ref parts 1)))
+    ((eq? instr "r") (build-instance (list-ref parts 2)))
+    ((eq? instr "l") (build-instance (list-ref parts 3)))
+    ((eq? instr "u") (build-instance (list-ref parts 4)))
+    ((eq? instr "d") (build-instance (list-ref parts 5)))
+    (else 0))))
+
+(define (constructor-update c parts)
+  (if (< (constructor-pc c) (length (constructor-code c)))
+      (let ((instr (list-ref (constructor-code c)
+			     (constructor-pc c))))
+	;; build the prim before (mutably??!) altering tx 
+	(let ((prim (constructor-build-part c instr parts)))
+	  (constructor
+	   (constructor-code c)
+	   (+ (constructor-pc c) 1)
+	   (constructor-update-tx (constructor-tx c) instr)
+	   (append (constructor-prims c) prim))))
+      c))

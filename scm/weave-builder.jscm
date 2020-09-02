@@ -1,21 +1,20 @@
 ;; -*- mode: scheme; -*-
 
 (load "flx/scm/fluxus.jscm")
-(load "scm/path-builder.jscm")
 
 ;;------------------------------------------------------------
 
 ;; produces lists of code for each weft thread
 
 ;; avoid repeating u/d and insert f instead
-(define (weave->instr kernel-code last warp)
+(define (weave->instr kernel-code state warp)
   (if warp
       (if (zero? kernel-code)
-	  (if (eq? last "d") "f" "d")  ;; 1 = warp over
-	  (if (eq? last "u") "f" "u"))
+  	  (if (eq? state "d") "fd" "d")  
+  	  (if (eq? state "u") "fu" "u")) ;; 1 = warp up
       (if (zero? kernel-code)
-	  (if (eq? last "u") "f" "u")  ;; 1 = warp over
-	  (if (eq? last "d") "f" "d"))))
+  	  (if (eq? state "u") "fu" "u")  ;; 0 = weft up 
+  	  (if (eq? state "d") "fd" "d"))))
 
 (define (kernel-row k i)
   (list-ref k i))
@@ -26,25 +25,36 @@
      (list-ref row i))
    k))
 
-(define (weave-builder warp kernel threads last)
-  (let ((i (modulo threads (length kernel))))
+(define (weave-builder warp kernel threads state)
+  (let ((i (modulo (- threads 1) (length kernel))))
     (cond
      ((zero? threads) '())
      (else
-      (let ((instr (weave->instr (list-ref kernel i) last warp)))
-	(cons instr (weave-builder warp kernel (- threads 1) instr)))))))
+      (let ((instr (weave->instr (list-ref kernel i) state warp)))
+	(cons instr (weave-builder
+		     warp kernel (- threads 1)
+		     (cond
+		      ((eq? instr "u") "u")
+		      ((eq? instr "d") "d")
+		      (else state)))))))))
 
 (define (weave-builder-weft kernel weft-threads warp-threads)
-  (let ((i (modulo weft-threads (length kernel))))
     (cond
      ((zero? weft-threads) '())
      (else
-      (append
-       (weave-builder 0 (kernel-row kernel i) warp-threads "?")
-       (if (zero? (modulo weft-threads 2)) (list "r" "r") (list "l" "l"))
-       (weave-builder-weft kernel (- weft-threads 1) warp-threads))))))
+      (let ((going-right (zero? (modulo weft-threads 2))))
+	(let ((i (modulo weft-threads (length kernel))))
+	  (append
+	   (weave-builder
+	    0 (if going-right
+		  (kernel-row kernel i)
+		  (dbg (reverse (kernel-row kernel i))))
+	    warp-threads "d")
+	   (if going-right (list "r" "r") (list "l" "l"))
+	   (weave-builder-weft kernel (- weft-threads 1) warp-threads))))
+      )))
 
 (define (weave-builder-warp kernel weft-threads warp-thread)
   (weave-builder
    1 (kernel-col kernel (modulo warp-thread (length kernel)))
-   weft-threads "?"))
+   weft-threads "d"))
