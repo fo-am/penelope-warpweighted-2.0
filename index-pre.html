@@ -2,25 +2,68 @@
 <html>
   <head>
     <title>Warpweighted 2.0</title>
-    <body>
-      <canvas class="canvas" id="webgl-canvas" width="960" height="540"></canvas>
-      <canvas class="canvas" id="canvas" width="960" height="540"></canvas>
-      <div class="code-container" style="display: none;">
-	<textarea id="code"></textarea>
-	output
-	<pre><div id="output"></div></pre>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+	<h2>Warpweighted 2.0</h2>
+	<div class="col-xs-12 col-sm-3">
+          <form id="params" action="." method="POST">
+	    <b>Draft Pattern</b><br>
+	    <table id="draft" class="table table-striped">
+	      <tr>
+		<td><input type="checkbox"/></td>
+		<td><input type="checkbox"/></td>
+		<td><input type="checkbox"/></td>
+		<td><input type="checkbox"/></td>
+	      </tr>
+	      <tr>
+		<td><input type="checkbox"/></td>
+		<td><input type="checkbox"/></td>
+		<td><input type="checkbox"/></td>
+		<td><input type="checkbox"/></td>
+	      </tr>
+	    </table>
+	    <table class="table table-striped">
+	      <tr><td>Size</td>
+		<td> <input type="number" id="warp-threads" value='4' onchange="update();" style="width:2em;"/></td>
+		<td> <input type="number" id="weft-threads" value='4' onchange="update();" style="width:2em;"/></td>
+	      </tr>
+	    </table>
+	    <b>Yarn Parameters</b><br>
+	    <table class="table table-striped">
+	      <tr><td>Thread width</td><td><input type="number" id="thread-width" value='0.8' style="width:5em;"/></td></tr>
+	      <tr><td>Weave depth</td><td><input type="number" id="weave-depth" value='0.5' style="width:5em;"/></td></tr>
+	    </table>
+	  </form>
+	</div>
+	<div class="col-xs-12 col-sm-9">
+	  <canvas class="canvas" id="webgl-canvas" width="960" height="540"></canvas>
+	  <canvas class="canvas" id="canvas" width="960" height="540"></canvas>
+	</div>
+	
+	<div class="code-container" style="display: none;">
+	  <textarea id="code"></textarea>
+	  output
+	  <pre><div id="output"></div></pre>
+	</div>
       </div>
-    </body>
-    <script src="js/jquery-1.9.1.min.js"></script>
-    <script src="flx/js/glMatrix.js"></script>
-    <script src="flx/js/glObjLoader.js"></script>
-    <script src="flx/js/glPlyLoader.js"></script>
-    <script src="flx/js/ditto.js"></script>
-    <script>
-      $( document ).ready(function() {
-          init_resources({{RESOURCES}});
-          init_static('{{SYNTAX}}','{{CODE}}');    
-      });
-    </script>
+  </body>
+  <script src="js/jquery-1.9.1.min.js"></script>
+  <script src="js/jquery-1.9.1.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="flx/js/glMatrix.js"></script>
+  <script src="flx/js/glObjLoader.js"></script>
+  <script src="flx/js/glPlyLoader.js"></script>
+  <script src="flx/js/ditto.js"></script>
+  <script>
+    $( document ).ready(function() {
+    init_resources({{RESOURCES}});
+    init_static('{{SYNTAX}}','{{CODE}}');    
+    });
+  </script>
 </body>
 </html>

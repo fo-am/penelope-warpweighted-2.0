@@ -2,6 +2,10 @@
 (load "flx/scm/fluxus.jscm")
 
 (define weave-height 0.5)
+(define thread-width 0.2)
+
+(define thread-start (/ thread-width 2))
+(define thread-end (- 1 thread-start))
 
 (define (build-parts)
   (list
@@ -10,12 +14,12 @@
      (with-primitive
       p
       (hide 1)
-      (pdata-set! "p" 0 (vector 0 0 weave-height))
-      (pdata-set! "p" 1 (vector 1 0 weave-height))
-      (pdata-set! "p" 2 (vector 1 1 weave-height))
-      (pdata-set! "p" 3 (vector 0 0 weave-height))
-      (pdata-set! "p" 4 (vector 0 1 weave-height))
-      (pdata-set! "p" 5 (vector 1 1 weave-height))
+      (pdata-set! "p" 0 (vector 0 thread-start weave-height))
+      (pdata-set! "p" 1 (vector 1 thread-start weave-height))
+      (pdata-set! "p" 2 (vector 1 thread-end weave-height))
+      (pdata-set! "p" 3 (vector 0 thread-start weave-height))
+      (pdata-set! "p" 4 (vector 0 thread-end weave-height))
+      (pdata-set! "p" 5 (vector 1 thread-end weave-height))
       (pdata-map! (lambda (c) (vector 1 1 1)) "c")
       (pdata-map! (lambda (n) (vector 0 0 -1)) "n")
       (pdata-upload!))
@@ -26,12 +30,12 @@
      (with-primitive
       p
       (hide 1)
-      (pdata-set! "p" 0 (vector 0 0 -weave-height))
-      (pdata-set! "p" 1 (vector 1 0 -weave-height))
-      (pdata-set! "p" 2 (vector 1 1 -weave-height))
-      (pdata-set! "p" 3 (vector 0 0 -weave-height))
-      (pdata-set! "p" 4 (vector 0 1 -weave-height))
-      (pdata-set! "p" 5 (vector 1 1 -weave-height))
+      (pdata-set! "p" 0 (vector 0 thread-start -weave-height))
+      (pdata-set! "p" 1 (vector 1 thread-start -weave-height))
+      (pdata-set! "p" 2 (vector 1 thread-end -weave-height))
+      (pdata-set! "p" 3 (vector 0 thread-start -weave-height))
+      (pdata-set! "p" 4 (vector 0 thread-end -weave-height))
+      (pdata-set! "p" 5 (vector 1 thread-end -weave-height))
       (pdata-map! (lambda (c) (vector 1 1 1)) "c")
       (pdata-map! (lambda (n) (vector 0 0 -1)) "n")
       (pdata-upload!))
@@ -81,7 +85,7 @@
        (lambda (i p)
 	 (vector
 	  (/ (quotient i 2) 11)
-	  (modulo i 2)
+	  (if (zero? (modulo i 2)) thread-start thread-end)
 	  (* (cos (* pi (/ (quotient i 2) 12))) -weave-height)))
        "p")
       (pdata-map! (lambda (c) (vector 1 1 1)) "c")
@@ -95,7 +99,7 @@
        "n")
       (pdata-upload!))
      p)
-
+   
    ;; down
    (let ((p (build-polygons 'triangle-strip 24)))    
      (with-primitive
@@ -106,7 +110,7 @@
        (lambda (i p)
 	 (vector
 	  (/ (quotient i 2) 11)
-	  (modulo i 2)
+	  (if (zero? (modulo i 2)) thread-start thread-end)
 	  (* (cos (* pi (/ (quotient i 2) 12))) weave-height)))
        "p")
       (pdata-map! (lambda (c) (vector 1 1 1)) "c")
@@ -119,6 +123,9 @@
 	      (vector 0 1 0))))	  
        "n")
       (pdata-upload!))
-     p)))
+     p)
+
+
+))
 
 

@@ -2,13 +2,14 @@
 
 (load "flx/scm/fluxus.jscm")
 
-(define (constructor code pc tx prims)
-  (list code pc tx prims))
+(define (constructor code pc tx col prims)
+  (list code pc tx col prims))
 
 (define (constructor-code p) (list-ref p 0))
 (define (constructor-pc p) (list-ref p 1))
 (define (constructor-tx p) (list-ref p 2))
-(define (constructor-prims p) (list-ref p 3))
+(define (constructor-col p) (list-ref p 3))
+(define (constructor-prims p) (list-ref p 4))
 
 (define (constructor-update-tx tx instr)
   (cond
@@ -21,6 +22,7 @@
 
 (define (constructor-build-part c instr parts)
   (with-state
+   (colour (constructor-col c))
    (concat (constructor-tx c))
    (cond
     ((eq? instr "fu") (build-instance (list-ref parts 0)))
@@ -41,5 +43,6 @@
 	   (constructor-code c)
 	   (+ (constructor-pc c) 1)
 	   (constructor-update-tx (constructor-tx c) instr)
+	   (constructor-col c)
 	   (append (constructor-prims c) prim))))
       c))

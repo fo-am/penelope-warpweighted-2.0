@@ -25,36 +25,47 @@
      (list-ref row i))
    k))
 
-(define (weave-builder warp kernel threads state)
-  (let ((i (modulo (- threads 1) (length kernel))))
+
+(define (weave-builder warp kernel thread threads state)
+  (let ((i (modulo thread (length kernel))))
     (cond
-     ((zero? threads) '())
+     ((>= thread threads) '())
      (else
       (let ((instr (weave->instr (list-ref kernel i) state warp)))
-	(cons instr (weave-builder
-		     warp kernel (- threads 1)
-		     (cond
-		      ((eq? instr "u") "u")
-		      ((eq? instr "d") "d")
-		      (else state)))))))))
+	;;(msg (+ i ": " (list-ref kernel i) "= " instr))
+	(cons
+	 instr
+	 (weave-builder
+	  warp kernel (+ thread 1) threads
+	  (cond
+	   ((eq? instr "u") "u")
+	   ((eq? instr "d") "d")
+	   (else state)))
+	 ))))))
 
-(define (weave-builder-weft kernel weft-threads warp-threads)
+(define (rot1 l)
+  (append (cdr l) (list (car l))))
+
+(define (weave-builder-weft kernel warp-threads weft-thread weft-threads)
     (cond
-     ((zero? weft-threads) '())
+     ((>= weft-thread weft-threads) '())
      (else
-      (let ((going-right (zero? (modulo weft-threads 2))))
-	(let ((i (modulo weft-threads (length kernel))))
-	  (append
+      (let ((going-right (zero? (modulo weft-thread 2))))
+	(let ((i (modulo weft-thread (length kernel))))
+	  ;;(msg (+ i ": " (kernel-row kernel i)))
+	  (append	  
 	   (weave-builder
 	    0 (if going-right
 		  (kernel-row kernel i)
-		  (dbg (reverse (kernel-row kernel i))))
-	    warp-threads "d")
+		  (rot1 (reverse (kernel-row kernel i))))
+	    0 warp-threads "?")
 	   (if going-right (list "r" "r") (list "l" "l"))
-	   (weave-builder-weft kernel (- weft-threads 1) warp-threads))))
-      )))
+	   (weave-builder-weft
+	    kernel warp-threads (+ weft-thread 1) weft-threads)))))))
 
-(define (weave-builder-warp kernel weft-threads warp-thread)
+(define (weave-builder-warp kernel warp-thread weft-threads)
   (weave-builder
    1 (kernel-col kernel (modulo warp-thread (length kernel)))
-   weft-threads "d"))
+   0 weft-threads "?")))
+
+

@@ -9,6 +9,7 @@
 
 (load-mesh-cache "models/receptor-donut.obj")
 
+(msg (weave-builder 0 (list 1 1 0 0) 0 4 "?"))
 
 (define (loom warp weft)
   (list warp weft))
@@ -22,16 +23,26 @@
 (define (build-loom kernel warp-threads weft-threads)
   (loom
    (build-list
-    0 (lambda (i)
-	 (constructor
-	  (weave-builder-warp kernel warp-threads i)
-	  0 (midentity) '())))
+    warp-threads
+    (lambda (i)
+      (constructor
+       (weave-builder-warp kernel i weft-threads)
+       0
+       (mrotate
+	(mtranslate (midentity) (vector (+ i 0.5) 1.5 0))
+	(vector 0 0 1)
+	(* -90 rad-conv))
+       (vector 0 0 0.5)
+       '())))
    (build-list
     1 (lambda (i)
 	(constructor
 	 ;;(list "f" "f" "f" "f" "l" "l" "f")
-	 (dbg (weave-builder-weft kernel warp-threads weft-threads))
-	 0 (midentity) '())))))
+	 (weave-builder-weft kernel warp-threads 0 weft-threads)
+	 0
+	 (midentity)
+	 (vector 1 1 1)
+	 '())))))
 
 (define (loom-update l parts)
   (loom
@@ -46,14 +57,12 @@
 
 (define f 0)
   
-(define (build)
-  
-  
+(define (build)  
   (console.log "building")
   (set! parts (build-parts))
   (set! loom-root (with-state
   		   (translate (vector -5 5 0))
-  		   (rotate (vector 30 0 0))
+  		   (rotate (vector 30 40 0))
   		   (build-locator)))
   (with-state
    (parent loom-root)
@@ -62,27 +71,40 @@
    ;;(texture (load-texture "thread.png"))
    (set! l (build-loom
   	    (list
-  	     (list 0 1 1 1)
-  	     (list 0 1 1 1)	     
-  	     (list 0 1 1 1)
-  	     (list 0 1 1 1)	     
+	     (list 1 1 0 0)
+	     (list 0 1 1 0)
+	     (list 0 0 1 1)
+	     (list 1 0 0 1)
+
+	     
+;  	     (list 1 1 0 0)
+;  	     (list 0 1 0 0)
+;  	     (list 0 0 0 0)
+;  	     (list 0 0 0 0)
+  	     
+
+;	     (list 1 0)
+;  	     (list 0 0)
+
   	     )
-  	    8 16)))
+  	    12 12)))
   
   )
 
-(msg (weave-builder-weft
-      (list
-       (list 1 0 0 0 0)
-       (list 1 0 0 0 0))
-      2 5))
 
-(msg (reverse (list 1 0 0 0 0)))
+(define (read-number id)
+  (let ((w ($ (string-append "#" id))))
+    (parseFloat (js "w[0].value"))))
+
+(define (update)
+  (msg (read-number "infection"))
+  )
 
 (define (render)
-  (with-state
-   (parent loom-root)
-   (set! l (loom-update l parts)))
+  (when (zero? (modulo f 10))
+	(with-state
+	 (parent loom-root)
+	 (set! l (loom-update l parts))))
   (with-primitive
    loom-root
    (rotate (vector 0 0 0)))
