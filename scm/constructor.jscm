@@ -6,32 +6,35 @@
   (list code pc tx col prims))
 
 (define (constructor-code p) (list-ref p 0))
+(define (constructor-modify-code p v) (list-replace p 0 v))
 (define (constructor-pc p) (list-ref p 1))
 (define (constructor-tx p) (list-ref p 2))
 (define (constructor-col p) (list-ref p 3))
 (define (constructor-prims p) (list-ref p 4))
+(define (constructor-modify-prims p v) (list-replace p 4 v))
 
 (define (constructor-update-tx tx instr)
-  (cond
-   ((eq? instr "r") (mrotate tx (vector 0 0 1) (* -90 rad-conv)))
-   ((eq? instr "l") (mtranslate
-		     (mrotate tx (vector 0 0 1) (* 90 rad-conv))
-		     (vector 1 -1 0)))
-   (else (mtranslate tx (vector 1 0 0)))))
+  (let ((token (car instr)))
+    (cond
+     ((eq? token "r") (mrotate tx (vector 0 0 1) (* -90 rad-conv)))
+     ((eq? token "l") (mtranslate
+		       (mrotate tx (vector 0 0 1) (* 90 rad-conv))
+		       (vector 1 -1 0)))
+     (else (mtranslate tx (vector 1 0 0))))))
 
 
-(define (constructor-build-part c instr parts)
+(define (constructor-build-part c token parts)
   (with-state
    (colour (constructor-col c))
    (concat (constructor-tx c))
    (cond
-    ((eq? instr "fu") (build-instance (list-ref parts 0)))
-    ((eq? instr "fd") (build-instance (list-ref parts 1)))
-    ((eq? instr "r") (build-instance (list-ref parts 2)))
-    ((eq? instr "l") (build-instance (list-ref parts 3)))
-    ((eq? instr "u") (build-instance (list-ref parts 4)))
-    ((eq? instr "d") (build-instance (list-ref parts 5)))
-    (else 0))))
+    ((eq? token "fu") (build-instance (list-ref parts 0)))
+    ((eq? token "fd") (build-instance (list-ref parts 1)))
+    ((eq? token "r") (build-instance (list-ref parts 2)))
+    ((eq? token "l") (build-instance (list-ref parts 3)))
+    ((eq? token "u") (build-instance (list-ref parts 4)))
+    ((eq? token "d") (build-instance (list-ref parts 5)))
+    (else (msg (+ "unknown token " token)) 0))))
 
 (define (constructor-update c parts)
   (if (< (constructor-pc c) (length (constructor-code c)))
@@ -46,3 +49,30 @@
 	   (constructor-col c)
 	   (append (constructor-prims c) prim))))
       c))
+
+(define (constructor-next-instr c)
+  (list-ref (constructor-code c)
+	    (constructor-pc c)))
+
+(define (constructor-recycle c)
+  (cond
+   ((> (length (constructor-prims c))
+       ;; we assume every code has a shape associated with it here
+       (* (length (constructor-code c)) 2))
+    (destroy (car (constructor-prims c)))
+    (constructor-modify-prims c (cdr (constructor-prims c))))
+   (else c)))
+
+(define (constructor-step c parts)
+  (let ((instr (list-ref (constructor-code c)
+			 (constructor-pc c))))
+    ;; build the prim before (mutably??!) altering tx 
+    (let ((prim (constructor-build-part c instr parts)))
+      (constructor-recycle
+       (constructor
+	(constructor-code c)
+	(modulo (+ (constructor-pc c) 1)
+		(length (constructor-code c)))
+	(constructor-update-tx (constructor-tx c) instr)
+	(constructor-col c)
+	(append (constructor-prims c) prim))))))

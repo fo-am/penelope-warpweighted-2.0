@@ -2,116 +2,76 @@
 
 (load "flx/scm/fluxus.jscm")
 (load "flx/scm/canvas.jscm")
-
-(load "scm/weave-builder.jscm")
-(load "scm/constructor.jscm")
-(load "scm/parts.jscm")
-
-(load-mesh-cache "models/receptor-donut.obj")
-
-(msg (weave-builder 0 (list 1 1 0 0) 0 4 "?"))
-
-(define (loom warp weft)
-  (list warp weft))
-
-(define (loom-warp l) (list-ref l 0))
-(define (loom-weft l) (list-ref l 1))
-
-
-;; ----------------------------------------------------------
-
-(define (build-loom kernel warp-threads weft-threads)
-  (loom
-   (build-list
-    warp-threads
-    (lambda (i)
-      (constructor
-       (weave-builder-warp kernel i weft-threads)
-       0
-       (mrotate
-	(mtranslate (midentity) (vector (+ i 0.5) 1.5 0))
-	(vector 0 0 1)
-	(* -90 rad-conv))
-       (vector 0 0 0.5)
-       '())))
-   (build-list
-    1 (lambda (i)
-	(constructor
-	 ;;(list "f" "f" "f" "f" "l" "l" "f")
-	 (weave-builder-weft kernel warp-threads 0 weft-threads)
-	 0
-	 (midentity)
-	 (vector 1 1 1)
-	 '())))))
-
-(define (loom-update l parts)
-  (loom
-   (map (lambda (e) (constructor-update e parts)) (loom-warp l))
-   (map (lambda (e) (constructor-update e parts)) (loom-weft l))))
+(load "scm/loom.jscm")
+(load "scm/interface.jscm")
 
 ;;---------------------------------------------------------
 
 (define l 0)
-(define loom-root 0)
-(define parts '())
-
-(define f 0)
+(define components (init-components))
+(define scene-root 0)
+(define frame 0)
   
 (define (build)  
-  (console.log "building")
-  (set! parts (build-parts))
-  (set! loom-root (with-state
-  		   (translate (vector -5 5 0))
-  		   (rotate (vector 30 40 0))
-  		   (build-locator)))
-  (with-state
-   (parent loom-root)
-   (shader-assign-compiled "default")  
-
-   ;;(texture (load-texture "thread.png"))
-   (set! l (build-loom
-  	    (list
-	     (list 1 1 0 0)
-	     (list 0 1 1 0)
-	     (list 0 0 1 1)
-	     (list 1 0 0 1)
-
-	     
-;  	     (list 1 1 0 0)
-;  	     (list 0 1 0 0)
-;  	     (list 0 0 0 0)
-;  	     (list 0 0 0 0)
-  	     
-
-;	     (list 1 0)
-;  	     (list 0 0)
-
-  	     )
-  	    12 12)))
+  (set! scene-root (build-locator))
   
-  )
+  (setup-draft-interface
+   (read-number "warp-threads")
+   (read-number "weft-threads"))
 
-
-(define (read-number id)
-  (let ((w ($ (string-append "#" id))))
-    (parseFloat (js "w[0].value"))))
-
+  (update-look)  
+  (update-view)
+  
+  (with-state
+   (parent scene-root)
+   (set! l (build-loom
+	    (read-draft-interface)
+	    (read-number "fabric-warp-size")
+	    (read-number "fabric-weft-size")))))
+  
 (define (update)
-  (msg (read-number "infection"))
-  )
+  (destroy scene-root)
+  (build))
+
+(define (update-look)
+  (build-components
+   components
+   (read-number "weave-depth")
+   (read-number "thread-width")
+   (is-checked? "render-texture")
+   (is-checked? "render-flat")))
+  
+(define (update-view)
+  (with-primitive
+   scene-root
+   (identity)
+   (translate (vector -10 5 0))
+   (rotate
+     (vector
+      (read-number "camera-rot-x")
+      (read-number "camera-rot-y") 0))))
+
+(define (update-draft)
+  (set! l (loom-update-kernel
+	      l (read-draft-interface)
+	      (read-number "fabric-warp-size")
+	      (read-number "fabric-weft-size")
+	      )))
 
 (define (render)
-  (when (zero? (modulo f 10))
-	(with-state
-	 (parent loom-root)
-	 (set! l (loom-update l parts))))
+  (with-state
+   (parent scene-root)
+   ;; todo: instances don't seem to inherit texture state...
+   (texture (load-texture
+	     (if (is-checked? "render-texture")
+		 "thread.png" "white.png")))
+   (set! l (loom-update l (/ 1 120) components)))
   (with-primitive
-   loom-root
+   scene-root
    (rotate (vector 0 0 0)))
-  (set! f (+ f 1)))
+  (set! frame (+ frame 1)))
 
 (canvas-setup)
-;;(clear-colour (list 0 1.0 0 0))
 (set-camera-angle 25)
 (set-camera-transform (mtranslate (midentity) (vector 0 0 -38)))
 (resize-glcanvas webgl-canvas)
@@ -120,7 +80,8 @@
 		"shaders/default.vert"
 		"shaders/default.frag")
 
-
 (build)
-
 (every-frame (render))
+
+
+

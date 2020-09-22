@@ -1,9 +1,4 @@
-;; -*- mode: scheme; -*-
-
-(load "flx/scm/fluxus.jscm")
-
-;;------------------------------------------------------------
-;; produces lists of thread codes from kernels
+#lang racket
 
 ;; kernel  = ((1 0)(0 1))
 ;; pattern = 0 1 0 1 0 1 0 1 
@@ -40,8 +35,8 @@
 (define (kernel-invert k)
   (map
    (lambda (r)
-     (pattern-invert r))
-   k))
+     (pattern-invert r)
+   k))) 
 
 (define (pattern->thread pattern state) 
   (cond
@@ -68,13 +63,17 @@
      (let ((direction (modulo row 2)))
        (append
         (pattern->thread
-	 (pattern-invert
-	  (if (zero? direction)
-	      (pattern-extend 0 (+ fabric-width 1) (kernel-row kernel row))
-	      (reverse (pattern-extend -1 (+ fabric-width 0) (kernel-row kernel row)))))
+         (if (zero? direction)
+             (pattern-extend 0 fabric-width (kernel-row kernel row))
+             (reverse (pattern-extend 0 fabric-width (kernel-row kernel row))))
          "?")
         (if (zero? direction)
             (list "r" "r")
             (list "l" "l"))
         (kernel->weft-thread kernel (+ row 1) fabric-width fabric-height))))))
+
+(kernel->weft-thread
+ (list (list 1 0)
+       (list 0 1))
+ 0 4 4)
 

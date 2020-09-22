@@ -1,20 +1,24 @@
 ;; -*- mode: scheme; -*-
 (load "flx/scm/fluxus.jscm")
 
-(define (auto-strip-normals)
+(define (auto-strip-normals flat)
   (pdata-index-map!
    (lambda (i n)
      (if (< i 2)
 	 (vcross
 	  (vnormalise (vsub (pdata-ref "p" 1) (pdata-ref "p" (+ i 2))))
-	  (if (zero? (modulo i 2))
-	      (vnormalise (vector 0 0.5 0.5))
-	      (vnormalise (vector 0 0.5 -0.5))))
+	  (if flat
+	      (vector 0 1 0)
+	      (if (zero? (modulo i 2))
+		  (vnormalise (vector 0 0.5 0.5))
+		  (vnormalise (vector 0 0.5 -0.5)))))
 	 (vcross
 	  (vnormalise (vsub (pdata-ref "p" (- i 2)) (pdata-ref "p" i)))
-	  (if (zero? (modulo i 2))
-	      (vnormalise (vector 0 0.5 0.5))
-	      (vnormalise (vector 0 0.5 -0.5))))))
+	  (if flat
+	      (vector 0 1 0)
+	      (if (zero? (modulo i 2))
+		  (vnormalise (vector 0 0.5 0.5))
+		  (vnormalise (vector 0 0.5 -0.5)))))))
    "n"))
 
 (define (auto-strip-tex)
@@ -25,16 +29,35 @@
 	 (vector (/ (quotient i 2) 11) 1 0)))
    "t"))
 
-(define (build-parts weave-height thread-width)
+
+(define (init-components)
+  (list
+   ;; forward up
+   (build-polygons 'triangles 6)
+   ;; forward down
+   (build-polygons 'triangles 6)  
+   ;; right
+   (build-polygons 'triangle-strip 24)
+   ;; left
+   (build-polygons 'triangle-strip 24)
+   ;; up
+   (build-polygons 'triangle-strip 24)
+   ;; down
+   (build-polygons 'triangle-strip 24)))
+
+(define (build-components components weave-height thread-width use-texture flat)
   (define thread-start (/ (- 1 thread-width) 2))
   (define thread-end (- 1 thread-start))
+
+  ;; todo: instances don't seem to inherit texture state...
   
   (list
    ;; forward up	
-   (let ((p (build-polygons 'triangles 6)))    
+   (let ((p (list-ref components 0))) 
      (with-primitive
       p
       (hide 1)
+      (texture (load-texture (if use-texture "thread.png" "white.png")))
       (pdata-set! "p" 0 (vector 0 thread-start weave-height))
       (pdata-set! "p" 1 (vector 1 thread-start weave-height))
       (pdata-set! "p" 2 (vector 1 thread-end weave-height))
@@ -42,13 +65,17 @@
       (pdata-set! "p" 4 (vector 0 thread-end weave-height))
       (pdata-set! "p" 5 (vector 1 thread-end weave-height))
 
-      (pdata-set! "n" 0 (vector 0 0.5 -0.5))
-      (pdata-set! "n" 1 (vector 0 0.5 -0.5))
-      (pdata-set! "n" 2 (vector 0 -0.5 -0.5))
-      (pdata-set! "n" 3 (vector 0 0.5 -0.5))
-      (pdata-set! "n" 4 (vector 0 -0.5 -0.5))
-      (pdata-set! "n" 5 (vector 0 -0.5 -0.5))
-
+      (cond
+       (flat
+	(pdata-map! (lambda (n) (vector 0 0 -1)) "n"))
+       (else
+	(pdata-set! "n" 0 (vector 0 0.5 -0.5))
+	(pdata-set! "n" 1 (vector 0 0.5 -0.5))
+	(pdata-set! "n" 2 (vector 0 -0.5 -0.5))
+	(pdata-set! "n" 3 (vector 0 0.5 -0.5))
+	(pdata-set! "n" 4 (vector 0 -0.5 -0.5))
+	(pdata-set! "n" 5 (vector 0 -0.5 -0.5))))
+      
       (pdata-set! "t" 0 (vector 0 0 0))
       (pdata-set! "t" 1 (vector 1 0 0))
       (pdata-set! "t" 2 (vector 1 1 0))
@@ -61,10 +88,11 @@
      p)
 
    ;; forward down
-   (let ((p (build-polygons 'triangles 6)))    
+   (let ((p (list-ref components 1)))
      (with-primitive
       p
       (hide 1)
+      (texture (load-texture (if use-texture "thread.png" "white.png")))
       (pdata-set! "p" 0 (vector 0 thread-start -weave-height))
       (pdata-set! "p" 1 (vector 1 thread-start -weave-height))
       (pdata-set! "p" 2 (vector 1 thread-end -weave-height))
@@ -72,12 +100,15 @@
       (pdata-set! "p" 4 (vector 0 thread-end -weave-height))
       (pdata-set! "p" 5 (vector 1 thread-end -weave-height))
 
-      (pdata-set! "n" 0 (vector 0 0.5 -0.5))
-      (pdata-set! "n" 1 (vector 0 0.5 -0.5))
-      (pdata-set! "n" 2 (vector 0 -0.5 -0.5))
-      (pdata-set! "n" 3 (vector 0 0.5 -0.5))
-      (pdata-set! "n" 4 (vector 0 -0.5 -0.5))
-      (pdata-set! "n" 5 (vector 0 -0.5 -0.5))
+      (cond
+       (flat (pdata-map! (lambda (n) (vector 0 0 -1)) "n"))
+       (else
+	(pdata-set! "n" 0 (vector 0 0.5 -0.5))
+	(pdata-set! "n" 1 (vector 0 0.5 -0.5))
+	(pdata-set! "n" 2 (vector 0 -0.5 -0.5))
+	(pdata-set! "n" 3 (vector 0 0.5 -0.5))
+	(pdata-set! "n" 4 (vector 0 -0.5 -0.5))
+	(pdata-set! "n" 5 (vector 0 -0.5 -0.5))))
       
       (pdata-set! "t" 0 (vector 0 0 0))
       (pdata-set! "t" 1 (vector 1 0 0))
@@ -91,10 +122,11 @@
      p)
    
    ;; right
-   (let ((p (build-polygons 'triangle-strip 24)))    
+   (let ((p (list-ref components 2)))
      (with-primitive
       p
       (hide 1)
+      (texture (load-texture (if use-texture "thread.png" "white.png")))
       (pdata-index-map!
        (lambda (i p)  
 	 (let ((r (if (zero? (modulo i 2)) thread-start thread-end)))
@@ -103,13 +135,17 @@
        "p")
       (pdata-map! (lambda (c) (vector 1 1 1)) "c")
       (auto-strip-tex)
-      (auto-strip-normals)
-      (pdata-map! (lambda (n) (vmul n -1)) "n")
+      (cond
+       (flat
+	(pdata-map! (lambda (n) (vector 0 0 -1)) "n"))
+       (else
+	(auto-strip-normals #f)
+	(pdata-map! (lambda (n) (vmul n -1)) "n")))
       (pdata-upload!))
      p)
 
    ;; left
-   (let ((p (build-polygons 'triangle-strip 24)))    
+   (let ((p (list-ref components 3)))    
      (with-primitive
       p
       (hide 1)
@@ -121,18 +157,23 @@
 		   (vector 0 1 0)))))
        "p")
       (auto-strip-tex)
-      (auto-strip-normals)
-      (pdata-map! (lambda (n) (vmul n -1)) "n")
+      (cond
+       (flat
+	(pdata-map! (lambda (n) (vector 0 0 -1)) "n"))
+       (else
+	(auto-strip-normals #f)
+	(pdata-map! (lambda (n) (vmul n -1)) "n")))
       (pdata-map! (lambda (c) (vector 1 1 1)) "c")
       
       (pdata-upload!))
      p)
 
    ;; up
-   (let ((p (build-polygons 'triangle-strip 24)))    
+   (let ((p (list-ref components 4)))
      (with-primitive
       p
       (hide 1)
+      (texture (load-texture (if use-texture "thread.png" "white.png")))
       (rotate (vector 45 0 0))
       (pdata-index-map!
        (lambda (i p)
@@ -144,19 +185,22 @@
 
       (auto-strip-tex)
       (pdata-map! (lambda (c) (vector 1 1 1)) "c")
-      (pdata-set! "n" 0 (vector 0 0.5 -0.5))
-      (pdata-set! "n" 1 (vector 0 -0.5 -0.5))
 
-      (auto-strip-normals)
+      (auto-strip-normals flat)
+
+      (when (not flat)
+	    (pdata-set! "n" 0 (vector 0 0.5 -0.5))
+	    (pdata-set! "n" 1 (vector 0 -0.5 -0.5)))
       
       (pdata-upload!))
      p)
    
    ;; down
-   (let ((p (build-polygons 'triangle-strip 24)))    
+   (let ((p (list-ref components 5))) 
      (with-primitive
       p
       (hide 1)
+      (texture (load-texture (if use-texture "thread.png" "white.png")))
       (rotate (vector 45 0 0))
       (pdata-index-map!
        (lambda (i p)
@@ -168,9 +212,11 @@
 
       (auto-strip-tex)
       (pdata-map! (lambda (c) (vector 1 1 1)) "c")
-      (auto-strip-normals)
-      (pdata-set! "n" 0 (vector 0 0.5 -0.5))
-      (pdata-set! "n" 1 (vector 0 -0.5 -0.5))
+      (auto-strip-normals flat)
+
+      (when (not flat)
+	    (pdata-set! "n" 0 (vector 0 0.5 -0.5))
+	    (pdata-set! "n" 1 (vector 0 -0.5 -0.5)))
       
       (pdata-upload!))
      p)

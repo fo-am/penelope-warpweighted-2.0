@@ -1,0 +1,138 @@
+;; -*- mode: scheme; -*-
+
+(load "flx/scm/fluxus.jscm")
+(load "scm/weave-builder.jscm")
+(load "scm/constructor.jscm")
+(load "scm/components.jscm")
+
+(define (loom warp weft state t root)
+  (list warp weft state t root))
+
+(define (loom-warp l) (list-ref l 0))
+(define (loom-modify-warp l v) (list-replace l 0 v))
+(define (loom-weft l) (list-ref l 1))
+(define (loom-modify-weft l v) (list-replace l 1 v))
+(define (loom-state l) (list-ref l 2))
+(define (loom-modify-state l v) (list-replace l 2 v))
+(define (loom-t l) (list-ref l 3))
+(define (loom-modify-t l v) (list-replace l 3 v))
+(define (loom-root l) (list-ref l 4))
+
+;; ----------------------------------------------------------
+
+(define (build-loom kernel warp-threads weft-threads)
+  (let ((root (build-locator)))
+    (with-state
+     (shader-assign-compiled "default")  
+     (parent root)
+     (loom
+      (build-list
+       warp-threads
+       (lambda (i)
+	 (constructor
+	  (kernel->warp-thread kernel i weft-threads)
+	  0
+	  (mrotate
+	   (mtranslate (midentity) (vector (+ i 0.5) 1.5 0))
+	   (vector 0 0 1)
+	   (* -90 rad-conv))
+	  (vector 0.5 0.5 1)
+	  '())))
+      (build-list
+       1 (lambda (i)
+	   (constructor
+	    (kernel->weft-thread kernel 0 warp-threads weft-threads)
+	    0
+	    (midentity)
+	    (vector 1 1 1)
+	    '())))
+      "filling-warp"
+      0
+      root))))
+
+(define (loom-step-warp l components)
+  (loom-modify-warp
+   l (map
+      (lambda (e)
+	(with-state
+	 (parent (loom-root l))
+	 (constructor-step e components)))
+      (loom-warp l))))
+
+(define (loom-step-weft l components)
+  (loom-modify-weft
+   l (map
+      (lambda (e)
+	(with-state
+	 (parent (loom-root l))
+	 (constructor-step e components)))
+      (loom-weft l))))
+
+(define move-time 1)
+(define weave-time 0.05)
+
+(define (loom-update l d components)
+  (let ((state (loom-state l)))
+    (cond
+     ((eq? state "filling-warp")
+      (if (< (constructor-pc (car (loom-warp l)))
+	     (- (length (constructor-code (car (loom-warp l)))) 1))
+	  (loom-step-warp l components)
+	  (loom-modify-state
+	   ;; step the warp a few extra times to bring
+	   ;; it under the weaving pos
+	   (loom-step-warp 
+	    (loom-step-warp l components)
+	    components)
+	   "filling-weft")))
+     ((eq? state "filling-weft")
+      (if (< (constructor-pc (car (loom-weft l)))
+	     (- (length (constructor-code (car (loom-weft l)))) 1))
+	  (loom-step-weft l components)
+	  (loom-modify-state l "weaving")))
+     ((eq? state "weaving")
+      (if (> (loom-t l) weave-time)
+	  (loom-step-weft 
+	   (loom-modify-t
+	    (let ((step (constructor-next-instr (car (loom-weft l)))))
+	      (if (or (eq? step "l") (eq? step "r"))
+		  (loom-modify-state l "selvedge")
+		  l))    
+	    0)
+	   components)
+	  (loom-modify-t l (+ (loom-t l) d))))
+     ((eq? state "selvedge")
+      (if (> (loom-t l) weave-time)
+	  (loom-step-weft 
+	   (loom-modify-t
+	    (let ((step (constructor-next-instr (car (loom-weft l)))))
+	      (if (or (not (eq? step "l")) (not (eq? step "r")))
+		  (loom-modify-state
+		   (loom-step-warp l components) "moving")
+		  l))    
+	    0)
+	   components)
+	  (loom-modify-t l (+ (loom-t l) d))))      
+     ((eq? state "moving")
+      (with-primitive
+       (loom-root l)
+       (translate (vector 0 d 0)) ;; one unit per second
+       (if (> (loom-t l) move-time)
+	   (loom-modify-state l "weaving")
+	   (loom-modify-t l (+ (loom-t l) d)))))
+     (else l))))
+
+
+(define (loom-update-kernel l kernel warp-threads weft-threads)
+  (loom-modify-weft
+   (loom-modify-warp
+    l (index-map
+       (lambda (i e)
+	 (constructor-modify-code
+	  e (kernel->warp-thread kernel i weft-threads)))
+       (loom-warp l)))
+   (map
+    (lambda (e)
+      (constructor-modify-code
+       e (kernel->weft-thread kernel 0 warp-threads weft-threads))) (loom-weft l))))
+

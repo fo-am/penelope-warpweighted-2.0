@@ -1,0 +1,49 @@
+;; -*- mode: scheme; -*-
+
+;;---------------------------------------------------------
+
+(define (read-number id)
+  (let ((w ($ (string-append "#" id))))
+    (parseFloat (js "w[0].value"))))
+
+(define (read-checked id)
+  (let ((w ($ (string-append "#" id))))
+    (if (js "w[0].checked") 1 0)))
+
+(define (is-checked? id)
+  (not (zero? (read-checked id))))
+
+(define (draft-row y x)
+  (if (< x 0)
+      ""
+      (string-append
+       "<input id='draft-" x "-" y "' type='checkbox' "
+       (if (if (zero? (modulo y 2))
+	       (zero? (modulo x 2))
+	       (zero? (modulo (+ x 1) 2))) "checked" "")
+       " style='width:1em;' onchange='update_draft();'></input> "
+       (draft-row y (- x 1)))))
+
+(define (setup-draft-interface w h)
+  (define (_ c y)
+    (if (< y 0)
+	""
+	(string-append
+	 (string-append (draft-row y (- w 1)) "<br>")
+	 (_ c (- y 1)))))
+  (let ((c ($ "#draft")))
+    (c.html (_ c (- h 1)))))
+
+(define (read-draft-interface)
+  (define (read-row x y)
+    (if (< x 0)
+	'()
+	(cons (read-checked (string-append "draft-" x "-" y))
+	      (read-row (- x 1) y))))
+  (define (read-col y)
+    (if (< y 0)
+	'()
+	(cons (read-row (- (read-number "warp-threads") 1) y)
+	      (read-col (- y 1)))))
+  (read-col (- (read-number "weft-threads") 1)))
+
