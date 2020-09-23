@@ -1,0 +1,89 @@
+/*@import url('https://fonts.googleapis.com/css?family=Barrio|Comfortaa|Josefin+Sans');*/
+
+@font-face {
+    font-family: 'Dosis';
+    src: url('../fonts/Dosis-Regular.ttf');
+}
+
+body {
+    /*font-family: 'Josefin Sans', sans-serif;*/
+    font-family: 'Comfortaa', cursive;
+    font-size: 150%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+
+h1 {
+    font-family: 'Barrio', cursive;
+    font-size: 400%;
+}
+
+input {
+    width: 12em;
+}
+
+.image-button {
+    text-align: center;
+    padding-bottom: 1em;
+}
+
+.code-container {
+    position: absolute;
+    left: 0px;
+    top: 1.2em;
+//    font-family: 'deja'; important;
+    font-size: 100%;
+    border: 0;
+    color: #000;
+    background-color: transparent;
+    z-index: 999;
+    width: 100%;
+}
+
+
+/* forcing everything into 16:9 aspect ratio all the time */
+
+.force-aspect {
+    position: absolute;
+    width: 100%; 
+    padding-bottom: 50%; /* 56.25% */
+}
+
+div.stretchy-wrapper {
+    position: relative;
+}
+
+div.stretchy-wrapper > div {
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: 0;
+    overflow: hidden;
+}
+
+#webgl-canvas {
+    width: 960px;
+    height: 540px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#canvas {
+    width: 960px;
+    height: 540px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+input {
+    width: 5em;
+}
+
+label {
+    font-weight: normal;
+}

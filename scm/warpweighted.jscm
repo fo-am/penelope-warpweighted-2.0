@@ -96,6 +96,9 @@
 (resize-canvas canvas)
 (resize-glcanvas webgl-canvas)
 
+(msg screen-width)
+(msg screen-height)
+
 (shader-compile "default" (list "p" "n" "t" "c")
 		"shaders/default.vert"
 		"shaders/default.frag")
