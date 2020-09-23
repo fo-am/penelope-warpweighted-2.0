@@ -53,8 +53,7 @@ div.stretchy-wrapper > div {
 }
 
 #webgl-canvas {
-    width: 960px;
-    height: 540px;
+    width: 100vw;
     position: absolute;
     left: 0;
     right: 0;
