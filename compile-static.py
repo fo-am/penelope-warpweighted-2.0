@@ -37,8 +37,8 @@ resources = [
     "scm/constructor.jscm",
     "scm/loom.jscm",
     "scm/interface.jscm",
-    "scm/weave-builder.jscm",
-    "scm/draft-generators.jscm",
+    "scm/symbolic.jscm",
+    "scm/generators.jscm",
 
     "shaders/default.vert",
     "shaders/default.frag",
