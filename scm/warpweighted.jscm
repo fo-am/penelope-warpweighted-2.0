@@ -28,7 +28,7 @@
    (set! l (build-loom
 	    (read-draft-interface)
 	    (read-number "fabric-warp-size")
-	    (read-number "fabric-weft-size")))))
+	    (make-even (read-number "fabric-weft-size"))))))
   
 (define (update)
   (destroy scene-root)

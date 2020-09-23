@@ -1,0 +1,82 @@
+;; -*- mode: scheme; -*-
+
+(define (make-tabby-draft w h)
+  (define (r x y)
+    (if (zero? x)
+        '()
+        (cons
+         (if (if (zero? (modulo y 2))
+                 (zero? (modulo x 2))
+                 (zero? (modulo (+ x 1) 2))) 1 0)
+         (r (- x 1) y))))
+  (if (zero? h)
+      '()
+      (cons
+       (r w h)
+       (make-tabby-draft w (- h 1)))))
+
+(define (make-basket-draft w h)
+  (define (r x y)
+    (if (zero? x)
+        '()
+        (cons
+         (if (if (<= x (/ w 2))
+                 (<= y (/ h 2))
+                 (> y (/ h 2)))
+             1 0)
+         (r (- x 1) y))))
+  (define (c x y)
+    (if (zero? y)
+        '()
+        (cons
+         (r x y)
+         (c x (- y 1)))))
+  (c w h))
+
+(define (make-twill-draft w h)
+  (define (r x y)
+    (if (zero? x)
+        '()
+        (cons
+         (if (and (< x (+ (/ w 2) y))
+                  (>= x y)) 1 0)
+         (r (- x 1) y))))
+  (define (c x y)
+    (if (zero? y)
+        '()
+        (cons
+         (r x y)
+         (c x (- y 1)))))
+  (c w h))
+
+(define (make-random-draft w h)
+  (define (r x y)
+    (if (zero? x)
+        '()
+        (cons
+         (random 2)
+         (r (- x 1) y))))
+  (if (zero? h)
+      '()
+      (cons
+       (r w h)
+       (make-random-draft w (- h 1)))))
+
+(define (generate type)
+  (msg type)
+  (cond
+   ((eq? type "tabby")
+    (make-tabby-draft (read-number "warp-threads")
+		      (read-number "weft-threads")))
+   ((eq? type "basket")
+    (make-basket-draft (read-number "warp-threads")
+		      (read-number "weft-threads")))
+   ((eq? type "twill")
+    (make-twill-draft (read-number "warp-threads")
+		      (read-number "weft-threads")))
+   ((eq? type "random")
+    (make-random-draft (read-number "warp-threads")
+		       (read-number "weft-threads")))
+   (else
+    (make-tabby-draft (read-number "warp-threads")
+		      (read-number "weft-threads")))))

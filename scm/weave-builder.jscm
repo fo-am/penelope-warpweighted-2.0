@@ -9,6 +9,10 @@
 ;; pattern = 0 1 0 1 0 1 0 1 
 ;; thread  = u fu fu d fd fd u
 
+(define (make-even v)
+  (if (zero? (modulo v 2))
+      v (+ v 1)))
+
 (define (pattern-extend c m p)
   (cond
     ((>= c m) '())
@@ -57,9 +61,20 @@
            ((eq? token "d") "d")
            (else state))))))))
 
+(define (kernel-final-state kernel warp-thread fabric-height)
+  (let ((thread (pattern->thread
+		 (pattern-extend 0 fabric-height (kernel-col kernel warp-thread))
+		 "?")))
+    ;; we need to run through the whole pattern to check the state
+    ;; at the end, to then plug in to recalculating it
+    (let ((token (list-ref thread (- (length thread) 1))))
+      (if (or (eq? token "u") (eq? token "fu"))
+	  "u" "d"))))
+
 (define (kernel->warp-thread kernel warp-thread fabric-height)
   (pattern->thread
-   (pattern-extend 0 fabric-height (kernel-col kernel warp-thread)) "?"))
+   (pattern-extend 0 fabric-height (kernel-col kernel warp-thread))
+   (kernel-final-state kernel warp-thread fabric-height)))
 
 (define (kernel->weft-thread kernel row fabric-width fabric-height)
   (cond
@@ -71,7 +86,7 @@
 	 (pattern-invert
 	  (if (zero? direction)
 	      (pattern-extend 0 (+ fabric-width 1) (kernel-row kernel row))
-	      (reverse (pattern-extend -1 (+ fabric-width 0) (kernel-row kernel row)))))
+	      (reverse (pattern-extend -1 fabric-width (kernel-row kernel row)))))
          "?")
         (if (zero? direction)
             (list "r" "r")
