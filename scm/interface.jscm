@@ -10,8 +10,18 @@
   (let ((w ($ (string-append "#" id))))
     (if (js "w[0].checked") 1 0)))
 
+(define (write-checked id v)
+  (let ((w ($ (string-append "#" id))))
+    (if (zero? v)
+	(js "w[0].checked=false")
+	(js "w[0].checked=true"))))
+
 (define (is-checked? id)
   (not (zero? (read-checked id))))
+
+(define (read-selected id)
+  (let ((w ($ (string-append "#" id))))
+    (js "w[0].value")))
 
 (define (draft-row y x)
   (if (< x 0)
@@ -21,7 +31,7 @@
        (if (if (zero? (modulo y 2))
 	       (zero? (modulo x 2))
 	       (zero? (modulo (+ x 1) 2))) "checked" "")
-       " style='width:1em;' onchange='update_draft();'></input> "
+       " style='width:1em;'></input> "
        (draft-row y (- x 1)))))
 
 (define (setup-draft-interface w h)
@@ -46,4 +56,16 @@
 	(cons (read-row (- (read-number "warp-threads") 1) y)
 	      (read-col (- y 1)))))
   (read-col (- (read-number "weft-threads") 1)))
+
+(define (write-draft-interface draft)
+  (define (write-row x y)
+    (when (>= x 0)
+	  (write-checked (string-append "draft-" x "-" y)
+			 (list-ref (list-ref draft y) x))
+	  (write-row (- x 1) y)))
+  (define (write-col y)
+    (when (>= y 0)
+	  (write-row (- (read-number "warp-threads") 1) y)
+	  (write-col (- y 1))))
+  (write-col (- (read-number "weft-threads") 1)))
 

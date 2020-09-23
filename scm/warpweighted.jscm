@@ -4,6 +4,7 @@
 (load "flx/scm/canvas.jscm")
 (load "scm/loom.jscm")
 (load "scm/interface.jscm")
+(load "scm/draft-generators.jscm")
 
 ;;---------------------------------------------------------
 
@@ -51,12 +52,15 @@
       (read-number "camera-rot-x")
       (read-number "camera-rot-y") 0))))
 
-(define (update-draft)
-  (set! l (loom-update-kernel
-	      l (read-draft-interface)
-	      (read-number "fabric-warp-size")
-	      (read-number "fabric-weft-size")
-	      )))
+(define (generate-draft)  
+  (write-draft-interface
+   (generate (read-selected "preset"))))
+
+(define (invert-draft)  
+  (let ((draft (kernel-invert (loom-draft l))))
+    (write-draft-interface draft)
+    ;;(set! l (loom-modify-draft l draft))
+    ))
 
 (define (render)
   (with-state
