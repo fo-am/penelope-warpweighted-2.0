@@ -93,6 +93,7 @@
 (canvas-setup)
 (set-camera-angle 25)
 (set-camera-transform (mtranslate (midentity) (vector 0 0 -38)))
+(resize-canvas canvas)
 (resize-glcanvas webgl-canvas)
 
 (shader-compile "default" (list "p" "n" "t" "c")
