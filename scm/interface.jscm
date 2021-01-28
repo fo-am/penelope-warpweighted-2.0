@@ -73,8 +73,8 @@
 (define (write-draft-interface draft)
   (define (write-row x y)
     (when (>= x 0)
-	  (write-checked (string-append "draft-" x "-" y)
-			 (list-ref (list-ref draft y) x))
+		  (write-checked (string-append "draft-" x "-" y)
+						 (list-ref (list-ref draft y) x))
 	  (write-row (- x 1) y)))
   (define (write-col y)
     (when (>= y 0)
@@ -87,9 +87,9 @@
 ;; can't 'store' the colours in the input fields so 'for now'
 ;; store them globally here...
 (define warp-colours 
-  (list (vector 1 0.5 0.5) (list 0.5 0.5 1)))
+  (list (vector 1 1 1) (vector 0.3 0.3 1)))
 (define weft-colours
-  (list (vector 1 0.5 1) (list 0.5 1 1)))
+  (list (vector 1 1 1) (list 0.3 0.3 1)))
 
 (define (colour->hex c)
   (define (_ n)

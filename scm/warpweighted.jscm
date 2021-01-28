@@ -29,33 +29,48 @@
 (define components (init-components))
 (define scene-root 0)
 (define frame 0)
-  
-(define (build)  
-  (set! scene-root (build-locator))
-  
+
+(define (init)
   (setup-draft-interface
    (read-number "warp-threads")
    (read-number "weft-threads"))
+  (write-draft-interface
+   (list (list 0 0 1 0 1 1)
+		 (list 1 0 0 1 1 0)
+		 (list 0 1 0 1 0 1)
+		 (list 1 0 1 0 1 0)
+		 (list 0 1 1 0 0 1)
+		 (list 1 1 0 1 0 0)))
+  (build))
 
-  (setup-colour-interface)
-  
+(define (build)  
+  (set! scene-root (build-locator))
+  (setup-colour-interface)  
   (update-look)  
-  (update-view)
-  
+  (update-view)  
   (with-state
    (parent scene-root)
    (set! l (build-loom
-	    (read-draft-interface)
-	    (read-number "fabric-warp-size")
-	    (make-even (read-number "fabric-weft-size"))
-		warp-colours
-		weft-colours))))
-  
+			(read-draft-interface)
+			(read-number "fabric-warp-size")
+			(make-even (read-number "fabric-weft-size"))
+			warp-colours
+			weft-colours))))
+
 (define (update)
   (destroy scene-root)
   (build))
 
+(define (update-draft)
+  (setup-draft-interface
+   (read-number "warp-threads")
+   (read-number "weft-threads")))
+
+(define (update-speed)
+  (set! weave-time (read-number "loom-speed")))
+  
 (define (update-look)
+  (shader-shared-uniform! "Ambient" "f" (- 1 (read-number "render-contrast")))
   (build-components
    components
    (read-number "weave-depth")
@@ -64,6 +79,7 @@
    (is-checked? "render-flat")))
   
 (define (update-view)
+  (set-camera-transform (mtranslate (midentity) (vector 0 1 (- (read-number "camera-distance")))))
   (with-primitive
    scene-root
    (identity)
@@ -98,19 +114,18 @@
 
 
 (canvas-setup)
+(clear-colour (vector 0.9 0.9 0.9))
 (set-camera-angle 25)
-(set-camera-transform (mtranslate (midentity) (vector 0 0 -38)))
+(set-camera-transform (mtranslate (midentity) (vector 0 1 (- (read-number "camera-distance")))))
 (resize-canvas canvas)
 (resize-glcanvas webgl-canvas)
 
-(msg screen-width)
-(msg screen-height)
-
+;; todo: this isn't working, it's using the default-default shader
 (shader-compile "default" (list "p" "n" "t" "c")
-		"shaders/default.vert"
-		"shaders/default.frag")
+				"shaders/default.vert"
+				"shaders/default.frag")
 
-(build)
+(init)
 (every-frame (render))
 
 

@@ -96,18 +96,59 @@
 	(cond
 	 ((eq? c 1) '()) ;; one = loop right around
 	 (else
-	  ;; todo: selvedge up/down/middle?
-	  (cons "fu" (_ (- c 1))))))
+	  ;; selvedge forward is in the middle
+	  (cons "f" (_ (- c 1))))))
   (append
+   ;; these will be replaced by tensioning below
    (list (if (zero? direction) "r" "l"))
    (_ size)
    (list (if (zero? direction) "r" "l"))))
 
-(define (kernel->weft-thread kernel row fabric-width fabric-height selvedge-size)
+;; todo: make this into a general purpose processor
+(define (tension-selvedge weft)
+  (define (_ last cur next)
+	(cond
+	 ((and (eq? last "fu") (eq? cur "l")) "ul")
+	 ((and (eq? last "fu") (eq? cur "r")) "ur")
+	 ((and (eq? last "fd") (eq? cur "l")) "dl")
+	 ((and (eq? last "fd") (eq? cur "r")) "dr")
+	 ((and (eq? cur "l") (eq? next "fu")) "lu")
+	 ((and (eq? cur "r") (eq? next "fu")) "ru")
+	 ((and (eq? cur "l") (eq? next "fd")) "ld")
+	 ((and (eq? cur "r") (eq? next "fd")) "rd")
+	 ((and (eq? last "u") (eq? cur "l")) "ul")
+	 ((and (eq? last "u") (eq? cur "r")) "ur")
+	 ((and (eq? last "d") (eq? cur "l")) "dl")
+	 ((and (eq? last "d") (eq? cur "r")) "dr")
+	 ((and (eq? cur "l") (eq? next "u")) "ld")
+	 ((and (eq? cur "r") (eq? next "u")) "rd")
+	 ((and (eq? cur "l") (eq? next "d")) "lu")
+	 ((and (eq? cur "r") (eq? next "d")) "ru")
+	 (else cur)))
+  ;; cdr to chop off first "?"
+  (append
+   ;; process all the tokens in the middle
+   (cdr (list-ref
+		 (foldl
+		  (lambda (next r)
+			(let ((last (list-ref r 0))
+				  (cur (list-ref r 1))
+				  (out (list-ref r 2)))
+			  (list cur next (append out (list (_ last cur next))))))
+		  (list "?" "?" '())
+		  weft)
+		 2))
+   ;; and sort the final token
+   (list
+	(_ (list-ref weft (- (length weft) 2))
+	   (list-ref weft (- (length weft) 1))
+	   (list-ref weft 0)))))
+
+(define (_kernel->weft-thread kernel row fabric-width fabric-height selvedge-size)
   (cond
    ((>= row fabric-height) '())
    (else
-	(let ((direction (modulo (quotient row selvedge-size) 2)))	   
+	(let ((direction (modulo (quotient row selvedge-size) 2)))
 	  (append
 	   (pattern->thread
 		(pattern-invert
@@ -119,8 +160,11 @@
 			   -1 fabric-width (kernel-row kernel row)))))
 		"?")		
 	   (make-selvedge direction selvedge-size)
-	   (kernel->weft-thread
+	   (_kernel->weft-thread
 		kernel
 		(+ row selvedge-size)
 		fabric-width fabric-height selvedge-size))))))
 
+(define (kernel->weft-thread kernel row fabric-width fabric-height selvedge-size)
+  (tension-selvedge
+   (_kernel->weft-thread kernel row fabric-width fabric-height selvedge-size)))

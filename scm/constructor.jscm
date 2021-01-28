@@ -28,14 +28,24 @@
 (define (constructor-prims p) (list-ref p 4))
 (define (constructor-modify-prims p v) (list-replace p 4 v))
 
-(define (constructor-update-tx tx instr)
-  (let ((token (car instr)))
-    (cond
-     ((eq? token "r") (mrotate tx (vector 0 0 1) (* -90 rad-conv)))
-     ((eq? token "l") (mtranslate
-		       (mrotate tx (vector 0 0 1) (* 90 rad-conv))
-		       (vector 1 -1 0)))
-     (else (mtranslate tx (vector 1 0 0))))))
+(define (constructor-update-tx tx token)  
+  (cond
+   ((or (eq? token "r")
+		(eq? token "dr")
+		(eq? token "ur")
+		(eq? token "rd")
+		(eq? token "ru"))
+	(mrotate tx (vector 0 0 1) (* -90 rad-conv)))
+   ((or (eq? token "l")
+		(eq? token "dl")
+		(eq? token "ul")
+		(eq? token "ld")
+		(eq? token "lu"))
+	(mtranslate
+	 (mrotate tx (vector 0 0 1) (* 90 rad-conv))
+	 (vector 1 -1 0)))
+   (else
+	(mtranslate tx (vector 1 0 0)))))
 
 (define debug-components #t)
 
@@ -44,12 +54,21 @@
    (colour (constructor-col c))
    (concat (constructor-tx c))
    (cond
-    ((eq? token "fu") (build-instance (list-ref parts 0)))
-    ((eq? token "fd") (build-instance (list-ref parts 1)))
-    ((eq? token "r") (build-instance (list-ref parts 2)))
-    ((eq? token "l") (build-instance (list-ref parts 3)))
-    ((eq? token "u") (build-instance (list-ref parts 4)))
-    ((eq? token "d") (build-instance (list-ref parts 5)))
+    ((eq? token "f") (build-instance (list-ref parts 0)))
+    ((eq? token "fu") (build-instance (list-ref parts 1)))
+    ((eq? token "fd") (build-instance (list-ref parts 2)))
+    ((eq? token "r") (build-instance (list-ref parts 3)))
+    ((eq? token "l") (build-instance (list-ref parts 4)))
+    ((eq? token "ur") (build-instance (list-ref parts 5)))
+    ((eq? token "ul") (build-instance (list-ref parts 6)))
+    ((eq? token "dr") (build-instance (list-ref parts 7)))
+    ((eq? token "dl") (build-instance (list-ref parts 8)))
+    ((eq? token "ru") (build-instance (list-ref parts 9)))
+    ((eq? token "lu") (build-instance (list-ref parts 10)))
+    ((eq? token "rd") (build-instance (list-ref parts 11)))
+    ((eq? token "ld") (build-instance (list-ref parts 12)))
+    ((eq? token "u") (build-instance (list-ref parts 13)))
+    ((eq? token "d") (build-instance (list-ref parts 14)))
     (else (msg (+ "unknown token " token)) 0))))
 
 (define (constructor-update c parts)
@@ -81,14 +100,14 @@
 
 (define (constructor-step c parts)
   (let ((instr (list-ref (constructor-code c)
-			 (constructor-pc c))))
+						 (constructor-pc c))))
     ;; build the prim before (mutably??!) altering tx 
     (let ((prim (constructor-build-part c instr parts)))
       (constructor-recycle
        (constructor
-	(constructor-code c)
-	(modulo (+ (constructor-pc c) 1)
-		(length (constructor-code c)))
-	(constructor-update-tx (constructor-tx c) instr)
-	(constructor-col c)
-	(append (constructor-prims c) prim))))))
+		(constructor-code c)
+		(modulo (+ (constructor-pc c) 1)
+				(length (constructor-code c)))
+		(constructor-update-tx (constructor-tx c) instr)
+		(constructor-col c)
+		(append (constructor-prims c) prim))))))
