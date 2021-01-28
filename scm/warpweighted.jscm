@@ -22,6 +22,8 @@
 (load "scm/generators.jscm")
 
 ;;---------------------------------------------------------
+(clear)
+(crank)
 
 (define l 0)
 (define components (init-components))
@@ -35,6 +37,8 @@
    (read-number "warp-threads")
    (read-number "weft-threads"))
 
+  (setup-colour-interface)
+  
   (update-look)  
   (update-view)
   
@@ -43,7 +47,9 @@
    (set! l (build-loom
 	    (read-draft-interface)
 	    (read-number "fabric-warp-size")
-	    (make-even (read-number "fabric-weft-size"))))))
+	    (make-even (read-number "fabric-weft-size"))
+		warp-colours
+		weft-colours))))
   
 (define (update)
   (destroy scene-root)
@@ -82,13 +88,14 @@
    (parent scene-root)
    ;; todo: instances don't seem to inherit texture state...
    (texture (load-texture
-	     (if (is-checked? "render-texture")
-		 "thread.png" "white.png")))
-   (set! l (loom-update l (/ 1 120) components)))
+			 (if (is-checked? "render-texture")
+				 "thread.png" "white.png")))
+   (set! l (loom-update l (/ 1 60) components)))
   (with-primitive
    scene-root
    (rotate (vector 0 0 0)))
   (set! frame (+ frame 1)))
+
 
 (canvas-setup)
 (set-camera-angle 25)

@@ -37,7 +37,7 @@
 
 ;; ----------------------------------------------------------
 
-(define (build-loom draft warp-threads weft-threads)
+(define (build-loom draft warp-threads weft-threads warp-colours weft-colours)
   (let ((root (build-locator)))
     (with-state
      (shader-assign-compiled "default")  
@@ -47,23 +47,25 @@
       (build-list
        warp-threads
        (lambda (i)
-	 (constructor
-	  (kernel->warp-thread draft i weft-threads)
-	  0
-	  (mrotate
-	   (mtranslate (midentity) (vector (+ i 0.5) 1.5 0))
-	   (vector 0 0 1)
-	   (* -90 rad-conv))
-	  (vector 0.5 0.5 1)
-	  '())))
+		 (constructor
+		  (kernel->warp-thread draft i weft-threads)
+		  0
+		  (mrotate
+		   (mtranslate (midentity) (vector (+ i 0.5) 1.5 0))
+		   (vector 0 0 1)
+		   (* -90 rad-conv))
+		  (list-ref warp-colours (modulo i (length warp-colours)))
+		  '())))
       (build-list
-       1 (lambda (i)
-	   (constructor
-	    (kernel->weft-thread draft 0 warp-threads weft-threads)
-	    0
-	    (midentity)
-	    (vector 1 1 1)
-	    '())))
+       (length weft-colours)
+	   (lambda (i)
+		 (constructor
+		  (kernel->weft-thread
+		   draft i warp-threads weft-threads (length weft-colours))
+		  i
+		  (mtranslate (midentity) (vector i (- i) 0))
+		  (list-ref weft-colours (modulo i (length weft-colours)))		  
+		  '())))
       "filling-warp"
       0
       root))))
@@ -151,14 +153,17 @@
    (loom-modify-weft
     (loom-modify-warp
      l (index-map
-	(lambda (i e)
-	  (constructor-modify-code
-	   e (kernel->warp-thread draft i weft-threads)))
-	(loom-warp l)))
-    (map
-     (lambda (e)
+		(lambda (i e)
+		  (constructor-modify-code
+		   e (kernel->warp-thread draft i weft-threads)))
+		(loom-warp l)))
+    (index-map
+     (lambda (i e)
        (constructor-modify-code
-	e (kernel->weft-thread draft 0 warp-threads weft-threads))) (loom-weft l)))
+		e (kernel->weft-thread
+		   draft i warp-threads weft-threads
+		   (length (loom-weft l)))))
+	 (loom-weft l)))
    draft))
 
 

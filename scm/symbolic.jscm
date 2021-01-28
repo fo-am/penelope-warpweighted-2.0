@@ -91,20 +91,36 @@
    (pattern-extend 0 fabric-height (kernel-col kernel warp-thread))
    (kernel-final-state kernel warp-thread fabric-height)))
 
-(define (kernel->weft-thread kernel row fabric-width fabric-height)
+(define (make-selvedge direction size)
+  (define (_ c)
+	(cond
+	 ((eq? c 1) '()) ;; one = loop right around
+	 (else
+	  ;; todo: selvedge up/down/middle?
+	  (cons "fu" (_ (- c 1))))))
+  (append
+   (list (if (zero? direction) "r" "l"))
+   (_ size)
+   (list (if (zero? direction) "r" "l"))))
+
+(define (kernel->weft-thread kernel row fabric-width fabric-height selvedge-size)
   (cond
-    ((>= row fabric-height) '())
-    (else
-     (let ((direction (modulo row 2)))
-       (append
-        (pattern->thread
-	 (pattern-invert
-	  (if (zero? direction)
-	      (pattern-extend 0 (+ fabric-width 1) (kernel-row kernel row))
-	      (reverse (pattern-extend -1 fabric-width (kernel-row kernel row)))))
-         "?")
-        (if (zero? direction)
-            (list "r" "r")
-            (list "l" "l"))
-        (kernel->weft-thread kernel (+ row 1) fabric-width fabric-height))))))
+   ((>= row fabric-height) '())
+   (else
+	(let ((direction (modulo (quotient row selvedge-size) 2)))	   
+	  (append
+	   (pattern->thread
+		(pattern-invert
+		 (if (zero? direction)
+			 (pattern-extend
+			  0 (+ fabric-width 1) (kernel-row kernel row))
+			 (reverse
+			  (pattern-extend
+			   -1 fabric-width (kernel-row kernel row)))))
+		"?")		
+	   (make-selvedge direction selvedge-size)
+	   (kernel->weft-thread
+		kernel
+		(+ row selvedge-size)
+		fabric-width fabric-height selvedge-size))))))
 

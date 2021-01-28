@@ -82,3 +82,73 @@
 	  (write-col (- y 1))))
   (write-col (- (read-number "weft-threads") 1)))
 
+;; colours
+
+;; can't 'store' the colours in the input fields so 'for now'
+;; store them globally here...
+(define warp-colours 
+  (list (vector 1 0.5 0.5) (list 0.5 0.5 1)))
+(define weft-colours
+  (list (vector 1 0.5 1) (list 0.5 1 1)))
+
+(define (colour->hex c)
+  (define (_ n)
+	(let ((v (trunc (* n 255))))
+	  (let ((v2 (v.toString 16)))
+		(v2.padStart 2 "0"))))
+  (string-append
+   "#"
+   (_ (vx c))
+   (_ (vy c)) 
+   (_ (vz c))))
+
+(define (build-colour-selectors type cols n)
+  (if (null? cols)
+      ""
+      (string-append
+       "<input id='colour-" type "-" n "' type='color' "
+       "value='" (colour->hex (car cols)) "' " 
+       " onchange='update_colour(this);''/><br/>"
+       (build-colour-selectors type (cdr cols) (+ n 1)))))
+
+(define (setup-colour-interface)
+  (let ((c ($ "#warp-colours")))
+    (c.html (build-colour-selectors "warp" warp-colours 0)))
+  (let ((c ($ "#weft-colours")))
+    (c.html (build-colour-selectors "weft" weft-colours 0))))
+
+(define (add-colour type)
+  (if (eq? type "warp")
+	  (set! warp-colours (append warp-colours (list (vector 1 1 1))))
+	  (set! weft-colours (append weft-colours (list (vector 1 1 1)))))
+  (update))	  
+
+(define (remove-colour type)
+  (if (eq? type "warp")
+	  (set! warp-colours (reverse (cdr (reverse warp-colours))))
+	  (set! weft-colours (reverse (cdr (reverse weft-colours)))))
+  (update))
+
+(define (hex->colour hex)
+  (let ((bigint (parseInt (hex.substring 1) 16)))
+    (list (/ (bitwise-and (bitwise-rshift bigint 16) 255) 255)
+		  (/ (bitwise-and (bitwise-rshift bigint 8) 255) 255)
+		  (/ (bitwise-and bigint 255) 255))))
+
+(define (update-colour c)
+  (let ((ss (c.id.split "-")))
+	(let ((type (list-ref ss 1))
+		  (id (string->number (list-ref ss 2))))
+	  (msg id)
+	  (if (eq? type "warp")
+		  (set! warp-colours
+				(list-replace
+				 warp-colours id
+				 (hex->colour c.value)))
+		  (set! weft-colours
+				(list-replace
+				 weft-colours id
+				 (hex->colour c.value))))
+	  (update))))
+		 
+
