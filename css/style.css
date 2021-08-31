@@ -1,7 +1,5 @@
-/*@import url('https://fonts.googleapis.com/css?family=Barrio|Comfortaa|Josefin+Sans');*/
 body {
-    /*font-family: 'Josefin Sans', sans-serif;*/
-    font-size: 150%;
+	font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
     padding: 0;
     margin: 0;
     overflow: hidden;
@@ -18,6 +16,13 @@ input {
 .image-button {
     text-align: center;
     padding-bottom: 1em;
+}
+
+.container {
+	display: flex;
+	flex-direction: row;
+	margin-left: 5em;
+	margin-right: 5em;
 }
 
 .code-container {
@@ -75,3 +80,195 @@ input {
 label {
     font-weight: normal;
 }
+
+
+.row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.col {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.warp-container {
+	margin: 1em;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+#warp-colours {
+	display: flex;
+	flex-direction: row;
+}
+
+.weft-container {
+	margin: 1em;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+#weft-colours {
+	display: flex;
+	flex-direction: column;
+}
+
+.yarn-col {
+	width: 2.5em;
+	height: 2.5em;
+}
+
+.yarn-button {
+	width: 1.5em;
+	height: 1.5em;
+	padding: 0;
+}
+
+.left {
+	width: 50%;
+	display: flex;
+	flex-direction: column;
+}
+
+.controls {
+	padding-top: 100px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.draft-checkbox {
+	width: 1em;
+}
+
+.draft-container {
+	margin: 1em;
+	display: flex;
+	flex-direction: column;
+}
+
+.sim-container {
+	margin-top: 1em;
+	flex: 1;
+	position: relative;
+}
+
+#draft {
+	margin: auto;
+	width: fit-content;
+	display:flex;
+}
+
+.draft-row {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+/* Customize the label (the container) */
+.draft-check {
+	border: 1px solid #fff;
+	height: 25px;
+	width: 25px;
+	display: inline-block;
+	position: relative;
+	cursor: pointer;
+}
+
+/* Hide the browser's default checkbox */
+.draft-check input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+/* Create a custom checkbox */
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: #eee;
+}
+
+/* On mouse-over, add a grey background color */
+.draft-check:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+/* On mouse-over, add a grey background color */
+.draft-check:hover input:checked ~ .checkmark {
+  background-color: #333;
+}
+
+/* When the checkbox is checked, add a blue background */
+.draft-check input:checked ~ .checkmark {
+  background-color: #000;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the checkmark when checked */
+.draft-check input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.draft-check .checkmark:after {
+}
+
+/*table tr:nth-child(even) {
+    background-color: #e7e7e7;
+}*/
+
+
+ /* Style the button that is used to open and close the collapsible content */
+.collapsible {
+	text-align: left;
+	width: 10em;
+	border: none;
+	background: none;
+	padding: 0;
+}
+
+/* Style the collapsible content. Note: hidden by default */
+.collapsible-content {
+	flex-direction: row;
+	display: none;
+	overflow-y: scroll;
+	background: #eee;
+} 
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+    font-size: 0.75em;
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    padding: 0.5em;
+    z-index: 1;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+

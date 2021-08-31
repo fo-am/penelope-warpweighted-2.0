@@ -30,17 +30,22 @@
 (define scene-root 0)
 (define frame 0)
 
+;   (list (list 0 0 1 0 1 1)
+;		 (list 1 0 0 1 1 0)
+;		 (list 0 1 0 1 0 1)
+;		 (list 1 0 1 0 1 0)
+;		 (list 0 1 1 0 0 1)
+;		 (list 1 1 0 1 0 0))
+
 (define (init)
   (setup-draft-interface
    (read-number "warp-threads")
    (read-number "weft-threads"))
   (write-draft-interface
-   (list (list 0 0 1 0 1 1)
-		 (list 1 0 0 1 1 0)
-		 (list 0 1 0 1 0 1)
-		 (list 1 0 1 0 1 0)
-		 (list 0 1 1 0 0 1)
-		 (list 1 1 0 1 0 0)))
+   (list (list 0 1 0 1)
+		 (list 1 0 1 0)
+		 (list 0 1 0 1)
+		 (list 1 0 1 0)))
   (build))
 
 (define (build)  
@@ -114,7 +119,7 @@
 
 
 (canvas-setup)
-(clear-colour (vector 0.9 0.9 0.9))
+(clear-colour (vector 1 1 1))
 (set-camera-angle 25)
 (set-camera-transform (mtranslate (midentity) (vector 0 1 (- (read-number "camera-distance")))))
 (resize-canvas canvas)

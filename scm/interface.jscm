@@ -40,11 +40,12 @@
   (if (< x 0)
       ""
       (string-append
+	   "<label class='draft-check'>"
        "<input id='draft-" x "-" y "' type='checkbox' "
        (if (if (zero? (modulo y 2))
 	       (zero? (modulo x 2))
 	       (zero? (modulo (+ x 1) 2))) "checked" "")
-       " style='width:1em;'></input> "
+       " ><span class='checkmark'></span></input></label> "
        (draft-row y (- x 1)))))
 
 (define (setup-draft-interface w h)
@@ -52,7 +53,10 @@
     (if (< y 0)
 	""
 	(string-append
-	 (string-append (draft-row y (- w 1)) "<br>")
+	 (string-append
+	  "<div class='draft-row'>"
+	  (draft-row y (- w 1))
+	  "</div>")
 	 (_ c (- y 1)))))
   (let ((c ($ "#draft")))
     (c.html (_ c (- h 1)))))
@@ -106,9 +110,9 @@
   (if (null? cols)
       ""
       (string-append
-       "<input id='colour-" type "-" n "' type='color' "
+       "<input id='colour-" type "-" n "' type='color' class='yarn-col'"
        "value='" (colour->hex (car cols)) "' " 
-       " onchange='update_colour(this);''/><br/>"
+       " onchange='update_colour(this);''/>"
        (build-colour-selectors type (cdr cols) (+ n 1)))))
 
 (define (setup-colour-interface)
