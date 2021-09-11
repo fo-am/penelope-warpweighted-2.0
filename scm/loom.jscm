@@ -123,6 +123,7 @@
 
 (define (loom-update l d components)
   (let ((state (loom-state l)))
+	(msg state)
     (cond
      ((eq? state "filling-warp")
       (if (< (constructor-pc (car (loom-warp l)))
@@ -139,7 +140,24 @@
       (if (< (constructor-pc (car (loom-weft l)))
 			 (- (length (constructor-code (car (loom-weft l)))) 1))
 		  (loom-step-weft-all l components)
-		  (loom-modify-state l "weaving")))
+		  (loom-modify-state l "warping")))
+	 ((eq? state "warping")
+      (if (> (loom-t l) weave-time)		  
+		  (loom-modify-t
+		   (if (< (loom-weft-count l) (length (loom-weft l)))
+			   (loom-modify-weft-count 
+				(loom-step-warp l components)
+				(+ (loom-weft-count l) 1))			   
+			   (loom-modify-weft-count
+				(loom-modify-state
+				 (loom-update-draft 
+				  l (read-draft-interface)
+				  (read-number "fabric-warp-size")
+				  (make-even (read-number "fabric-weft-size")))
+				 "weaving")
+				0))    
+		   0)
+		  (loom-modify-t l (+ (loom-t l) d))))	  
      ((eq? state "weaving")
       (if (> (loom-t l) weave-time)
 		  (loom-step-weft 
@@ -161,34 +179,17 @@
 		   (loom-modify-t
 			(let ((step (constructor-next-instr (list-ref (loom-weft l) (loom-weft-count l)))))
 			  (if (not (loom-not-selvedge-step? step))
-				  (loom-modify-state l "warping")
+				  (loom-modify-state l "moving")
 				  l))    
 			0)
 		   components)
 		  (loom-modify-t l (+ (loom-t l) d))))
-	 ((eq? state "warping")
-      (if (> (loom-t l) weave-time)		  
-		  (loom-modify-t
-		   (if (< (loom-weft-count l) (length (loom-weft l)))
-			   (loom-modify-weft-count 
-				(loom-step-warp l components)
-				(+ (loom-weft-count l) 1))			   
-			   (loom-modify-weft-count
-				(loom-modify-state
-				 (loom-update-draft 
-				  l (read-draft-interface)
-				  (read-number "fabric-warp-size")
-				  (make-even (read-number "fabric-weft-size")))
-				 "moving")
-				0))    
-		   0)
-		  (loom-modify-t l (+ (loom-t l) d))))	  
-     ((eq? state "moving")
+	  ((eq? state "moving")
       (with-primitive
        (loom-root l)
        (translate (vector 0 (* d (length (loom-weft l))) 0)) ;; one unit per second
        (if (> (loom-t l) move-time)
-		   (loom-modify-state l "weaving")
+		   (loom-modify-state l "warping")
 		   (loom-modify-t l (+ (loom-t l) d)))))
      (else l))))
 
