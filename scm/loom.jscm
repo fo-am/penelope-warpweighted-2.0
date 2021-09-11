@@ -62,8 +62,8 @@
        (length weft-colours)
 	   (lambda (i)
 		 (constructor
-		  (dbg (kernel->weft-thread
-		   draft i warp-threads weft-threads (length weft-colours)))
+		  (kernel->weft-thread
+		   draft i warp-threads weft-threads (length weft-colours))
 		  i
 		  (mtranslate (midentity) (vector i (- i) (* i 0.001))) ;; prevent z fighting
 		  (vmul (list-ref weft-colours (modulo i (length weft-colours))) 2)		
