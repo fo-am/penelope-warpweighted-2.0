@@ -74,15 +74,15 @@
 (define (constructor-update c parts)
   (if (< (constructor-pc c) (length (constructor-code c)))
       (let ((instr (list-ref (constructor-code c)
-			     (constructor-pc c))))
-	;; build the prim before (mutably??!) altering tx 
-	(let ((prim (constructor-build-part c instr parts)))
-	  (constructor
-	   (constructor-code c)
-	   (+ (constructor-pc c) 1)
-	   (constructor-update-tx (constructor-tx c) instr)
-	   (constructor-col c)
-	   (append (constructor-prims c) prim))))
+							 (constructor-pc c))))
+		;; build the prim before (mutably??!) altering tx 
+		(let ((prim (constructor-build-part c instr parts)))
+		  (constructor
+		   (constructor-code c)
+		   (+ (constructor-pc c) 1)
+		   (constructor-update-tx (constructor-tx c) instr)
+		   (constructor-col c)
+		   (append (constructor-prims c) prim))))
       c))
 
 (define (constructor-next-instr c)
@@ -101,6 +101,11 @@
 (define (constructor-step c parts)
   (let ((instr (list-ref (constructor-code c)
 						 (constructor-pc c))))
+	(when (eq? instr undefined)
+		  (msg (length (constructor-code c)))
+		  (msg (constructor-code c))
+		  (msg (constructor-pc c)))
+
     ;; build the prim before (mutably??!) altering tx 
     (let ((prim (constructor-build-part c instr parts)))
       (constructor-recycle

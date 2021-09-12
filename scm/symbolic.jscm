@@ -28,6 +28,16 @@
   (if (zero? (modulo v 2))
       v (+ v 1)))
 
+;; increase size so it contains a whole number
+;; multiple of wefts*2 (forward and back)
+(define (make-divisible-by-wefts size wefts)
+  (if (zero? (modulo size (* wefts 2)))
+	  size
+	  (+ size (- (* wefts 2) (modulo size (* wefts 2))))))
+
+;(define (make-divisible-by-wefts size wefts)
+;  (+ size (modulo size (* wefts 2))))
+
 (define (pattern-extend c m p)
   (cond
     ((>= c m) '())
@@ -124,6 +134,19 @@
 	 ((and (eq? cur "r") (eq? next "u")) "rd")
 	 ((and (eq? cur "l") (eq? next "d")) "lu")
 	 ((and (eq? cur "r") (eq? next "d")) "ru")
+
+	 ;; tension forwards in selvedge
+	 ;; ((and (eq? last "fu") (eq? cur "f")) "fu")
+	 ;; ((and (eq? last "fd") (eq? cur "f")) "fd")
+	 ;; ((and (eq? last "lu") (eq? cur "f")) "fu")
+	 ;; ((and (eq? last "ld") (eq? cur "f")) "fd")
+	 ;; ((and (eq? last "ru") (eq? cur "f")) "fu")
+	 ;; ((and (eq? last "rd") (eq? cur "f")) "fd")
+	 ;; ((and (eq? last "ul") (eq? cur "f")) "fu")
+	 ;; ((and (eq? last "dl") (eq? cur "f")) "fd")
+	 ;; ((and (eq? last "ur") (eq? cur "f")) "fu")
+	 ;; ((and (eq? last "dr") (eq? cur "f")) "fd")
+
 	 (else cur)))
   ;; cdr to chop off first "?"
   (append

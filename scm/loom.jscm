@@ -40,7 +40,8 @@
 ;; ----------------------------------------------------------
 
 (define (build-loom draft warp-threads weft-threads warp-colours weft-colours)
-  (let ((root (build-locator)))
+  (let ((root (build-locator))
+		(weft-threads (make-divisible-by-wefts weft-threads (length weft-colours))))
     (with-state
      (shader-assign-compiled "default")  
      (parent root)
@@ -113,21 +114,22 @@
 ;;	  (eq? step "ul") (eq? step "ur")))
 
 (define (loom-selvedge-step? step)
-  (or (eq? step "l") (eq? step "r")
- 	  (eq? step "dl") (eq? step "dr")
- 	  (eq? step "ul") (eq? step "ur")))
+  (or
+   (eq? step "l") (eq? step "r")
+   (eq? step "dl") (eq? step "dr")
+   (eq? step "ul") (eq? step "ur")))
 
 (define (loom-not-selvedge-step? step)
   (or (eq? step "u") (eq? step "d")
- 	  (eq? step "fu") (eq? step "fd")))
+	  (eq? step "fu") (eq? step "fd")))
 
 (define (loom-update l d components)
   (let ((state (loom-state l)))
-	(msg state)
     (cond
      ((eq? state "filling-warp")
-      (if (< (constructor-pc (car (loom-warp l)))
-			 (- (length (constructor-code (car (loom-warp l)))) 1))
+      (if (and (not (null? (loom-warp l)))
+			   (< (constructor-pc (car (loom-warp l)))
+				  (- (length (constructor-code (car (loom-warp l)))) 1)))
 		  (loom-step-warp l components)
 		  (loom-modify-state
 		   ;; step the warp a few extra times to bring
@@ -136,11 +138,13 @@
 			(loom-step-warp l components)
 			components)
 		   "filling-weft")))
+
      ((eq? state "filling-weft")
       (if (< (constructor-pc (car (loom-weft l)))
 			 (- (length (constructor-code (car (loom-weft l)))) 1))
 		  (loom-step-weft-all l components)
 		  (loom-modify-state l "warping")))
+	 
 	 ((eq? state "warping")
       (if (> (loom-t l) weave-time)		  
 		  (loom-modify-t
@@ -153,16 +157,20 @@
 				 (loom-update-draft 
 				  l (read-draft-interface)
 				  (read-number "fabric-warp-size")
-				  (make-even (read-number "fabric-weft-size")))
+				  (make-divisible-by-wefts
+				   (read-number "fabric-weft-size")
+				   (length (loom-weft l))))
 				 "weaving")
 				0))    
 		   0)
 		  (loom-modify-t l (+ (loom-t l) d))))	  
-     ((eq? state "weaving")
+
+	 ((eq? state "weaving")
       (if (> (loom-t l) weave-time)
 		  (loom-step-weft 
 		   (loom-modify-t
 			(let ((step (constructor-next-instr (list-ref (loom-weft l) (loom-weft-count l)))))
+			  ;;(msg (list "w" (loom-weft-count l) step (constructor-pc (list-ref (loom-weft l) (loom-weft-count l)))))
 			  (if (loom-selvedge-step? step)
 				  (if (< (loom-weft-count l) (- (length (loom-weft l)) 1))
 					  (loom-modify-weft-count
@@ -173,18 +181,26 @@
 			0)
 		   components)
 		  (loom-modify-t l (+ (loom-t l) d))))
-     ((eq? state "selvedge")
+
+	 ((eq? state "selvedge")
       (if (> (loom-t l) weave-time)
 		  (loom-step-weft 
 		   (loom-modify-t
 			(let ((step (constructor-next-instr (list-ref (loom-weft l) (loom-weft-count l)))))
-			  (if (not (loom-not-selvedge-step? step))
-				  (loom-modify-state l "moving")
-				  l))    
+			  ;;(msg (list "s" (loom-weft-count l) step (constructor-pc (list-ref (loom-weft l) (loom-weft-count l)))))
+			  ;;(msg (loom-weft l))
+			  (if (loom-not-selvedge-step? step)
+				  (if (< (loom-weft-count l) (- (length (loom-weft l)) 1))
+					  (loom-modify-weft-count
+					   l (+ (loom-weft-count l) 1))
+					  (loom-modify-weft-count
+					   (loom-modify-state l "moving") 0))
+				  l))   
 			0)
 		   components)
 		  (loom-modify-t l (+ (loom-t l) d))))
-	  ((eq? state "moving")
+	 
+	 ((eq? state "moving")
       (with-primitive
        (loom-root l)
        (translate (vector 0 (* d (length (loom-weft l))) 0)) ;; one unit per second

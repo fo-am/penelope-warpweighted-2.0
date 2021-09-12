@@ -55,10 +55,13 @@
   (update-view)  
   (with-state
    (parent scene-root)
+   
    (set! l (build-loom
 			(read-draft-interface)
 			(read-number "fabric-warp-size")
-			(make-even (read-number "fabric-weft-size"))
+			(make-divisible-by-wefts
+			 (read-number "fabric-weft-size")
+			 (length weft-colours))
 			warp-colours
 			weft-colours))))
 
