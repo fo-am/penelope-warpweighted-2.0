@@ -78,7 +78,7 @@
 		  <table>	  
 			<tr><td>Thread width</td><td><input type="number" id="thread-width" value='0.8' onchange="update_look();" style="width:5em;"/></td></tr>
 			<tr><td>Weave depth</td><td><input type="number" id="weave-depth" value='0.2' onchange="update_look();" style="width:5em;"/></td></tr>
-			<tr><td>Fabric warp size</td><td><input type="number" id="fabric-warp-size" value='18' onchange="update();" style="width:5em;"/></td></tr>
+			<tr><td>Fabric warp size</td><td><input type="number" id="fabric-warp-size" value='20' onchange="update();" style="width:5em;"/></td></tr>
 			<tr><td>Fabric weft size</td><td><input type="number" id="fabric-weft-size" value='12' onchange="update();" style="width:5em;"/></td></tr>
 			<tr><td>Texture</td><td><input type="checkbox" checked id="render-texture" onchange="update_look();" style="width:5em;"/></td></tr>
 			<tr><td>Flat</td><td><input type="checkbox" checked id="render-flat" onchange="update_look();" style="width:5em;"/></td></tr>
@@ -229,21 +229,23 @@ ret\n\
   (build))\n\
 \n\
 (define (build)  \n\
-  (set! scene-root (build-locator))\n\
-  (setup-colour-interface)  \n\
-  (update-look)  \n\
-  (update-view)  \n\
-  (with-state\n\
-   (parent scene-root)\n\
-   \n\
-   (set! l (build-loom\n\
-			(read-draft-interface)\n\
-			(read-number "fabric-warp-size")\n\
-			(make-divisible-by-wefts\n\
-			 (read-number "fabric-weft-size")\n\
-			 (length weft-colours))\n\
-			warp-colours\n\
-			weft-colours))))\n\
+  (let ((weft-size (make-divisible-by-wefts\n\
+					(read-number "fabric-weft-size")\n\
+					(length weft-colours))))\n\
+\n\
+	(set! scene-root (build-locator))\n\
+	(setup-colour-interface)  \n\
+	(update-look)  \n\
+	(update-view)  \n\
+	(with-state\n\
+	 (parent scene-root)\n\
+	 (translate (vector 0 (- weft-size 12) 0))\n\
+	 (set! l (build-loom\n\
+			  (read-draft-interface)\n\
+			  (read-number "fabric-warp-size")\n\
+			  weft-size\n\
+			  warp-colours\n\
+			  weft-colours)))))\n\
 \n\
 (define (update)\n\
   (destroy scene-root)\n\

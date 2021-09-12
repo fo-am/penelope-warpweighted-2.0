@@ -49,21 +49,23 @@
   (build))
 
 (define (build)  
-  (set! scene-root (build-locator))
-  (setup-colour-interface)  
-  (update-look)  
-  (update-view)  
-  (with-state
-   (parent scene-root)
-   
-   (set! l (build-loom
-			(read-draft-interface)
-			(read-number "fabric-warp-size")
-			(make-divisible-by-wefts
-			 (read-number "fabric-weft-size")
-			 (length weft-colours))
-			warp-colours
-			weft-colours))))
+  (let ((weft-size (make-divisible-by-wefts
+					(read-number "fabric-weft-size")
+					(length weft-colours))))
+
+	(set! scene-root (build-locator))
+	(setup-colour-interface)  
+	(update-look)  
+	(update-view)  
+	(with-state
+	 (parent scene-root)
+	 (translate (vector 0 (- weft-size 12) 0))
+	 (set! l (build-loom
+			  (read-draft-interface)
+			  (read-number "fabric-warp-size")
+			  weft-size
+			  warp-colours
+			  weft-colours)))))
 
 (define (update)
   (destroy scene-root)

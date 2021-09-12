@@ -21,8 +21,6 @@ input {
 .container {
 	display: flex;
 	flex-direction: row;
-	margin-left: 5em;
-	margin-right: 5em;
 }
 
 .code-container {
@@ -61,16 +59,16 @@ div.stretchy-wrapper > div {
     position: absolute;
     left: 0;
     right: 0;
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 #canvas {
     position: absolute;
     left: 0;
     right: 0;
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 input {
