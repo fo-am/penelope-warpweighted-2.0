@@ -283,7 +283,7 @@ label {
 
 .select-selected {
 	background-color: #c5b799; 
-	width: 2em !important;
+	width: 2em;
 	height: 2em;
 	margin: 1px;
 }
@@ -310,7 +310,6 @@ label {
 .select-items div,.select-selected {
   color: black;
   padding: 5px 5px;
-  width: 7em;
   border: 1px solid transparent;
   border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
   cursor: pointer;
@@ -318,6 +317,8 @@ label {
 
 /* Style items (options): */
 .select-items {
+   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  width: 8em;
   position: absolute;
   background-color: DodgerBlue;
   top: 100%;
