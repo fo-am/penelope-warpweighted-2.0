@@ -87,13 +87,11 @@
   (write-col (- (read-number "weft-threads") 1)))
 
 ;; colours
-
-;; can't 'store' the colours in the input fields so 'for now'
-;; store them globally here...
-(define warp-colours 
-  (list (vector 1 1 1) (vector 0.3 0.3 1)))
-(define weft-colours
-  (list (vector 1 1 1) (list 0.3 0.3 1)))
+(define (hex->colour hex)
+  (let ((bigint (parseInt (hex.substring 1) 16)))
+    (list (/ (bitwise-and (bitwise-rshift bigint 16) 255) 255)
+		  (/ (bitwise-and (bitwise-rshift bigint 8) 255) 255)
+		  (/ (bitwise-and bigint 255) 255))))
 
 (define (colour->hex c)
   (define (_ n)
@@ -106,44 +104,85 @@
    (_ (vy c)) 
    (_ (vz c))))
 
+(define (colour-selector id)
+  (string-append
+  "<div id='" id "-div' class='custom-select'>
+		  <select id='" id "'>
+			<option value='#c5b799'>undyed cotton</option>
+			<option value='#c5b799'>undyed cotton</option>
+			<option value='#637a8f'>light woad</option>
+			<option value='#445a8a'>dark woad</option>
+			<option value='#574e5e'>oak gall</option>
+			<option value='#a11939'>dark madder</option>
+			<option value='#de9170'>light madder</option>
+			<option value='#eae82b'>light weld</option>
+			<option value='#929240'>dark weld</option>
+		  </select>
+		</div>"))
+
+;; can't 'store' the colours in the input fields so 'for now'
+;; store them globally here...
+
+;; actually, now we are using a select we are so retrofitting badly
+
+(define warp-colours 
+  (list (hex->colour "#c5b799") (hex->colour "#c5b799")))
+(define weft-colours
+  (list (hex->colour "#c5b799") (hex->colour "#c5b799")))
+
 (define (build-colour-selectors type cols n)
   (if (null? cols)
       ""
       (string-append
-       "<input id='colour-" type "-" n "' type='color' class='yarn-col'"
-       "value='" (colour->hex (car cols)) "' " 
-       " onchange='update_colour(this);''/>"
+       (colour-selector (string-append "colour-" type "-" n))
        (build-colour-selectors type (cdr cols) (+ n 1)))))
 
 (define (setup-colour-interface)
   (let ((c ($ "#warp-colours")))
     (c.html (build-colour-selectors "warp" warp-colours 0)))
   (let ((c ($ "#weft-colours")))
-    (c.html (build-colour-selectors "weft" weft-colours 0))))
+    (c.html (build-colour-selectors "weft" weft-colours 0)))
+
+  (initOneColourSelect (string-append "colour-warp-0-div"))
+  (initOneColourSelect (string-append "colour-warp-1-div"))
+  (initOneColourSelect (string-append "colour-weft-0-div"))
+  (initOneColourSelect (string-append "colour-weft-1-div")))
 
 (define (add-colour type)
-  (if (eq? type "warp")
-	  (set! warp-colours (append warp-colours (list (vector 1 1 1))))
-	  (set! weft-colours (append weft-colours (list (vector 1 1 1)))))
-  (update))	  
-
-(define (remove-colour type)
-  (if (eq? type "warp")
-	  (set! warp-colours (reverse (cdr (reverse warp-colours))))
-	  (set! weft-colours (reverse (cdr (reverse weft-colours)))))
+  (cond
+   ((eq? type "warp")
+	(let ((c ($ "#warp-colours")))
+	  (c.append (colour-selector (string-append "colour-" type "-" (length warp-colours))))
+	  (initOneColourSelect (string-append "colour-" type "-" (length warp-colours) "-div"))
+	  (set! warp-colours (append warp-colours (list (hex->colour "#c5b799"))))))
+   (else
+	(let ((c ($ "#weft-colours")))
+	  (c.append (colour-selector (string-append "colour-" type "-" (length weft-colours))))
+	  (initOneColourSelect (string-append "colour-" type "-" (length weft-colours) "-div"))
+	  (set! weft-colours (append weft-colours (list (hex->colour "#c5b799")))))))
   (update))
 
-(define (hex->colour hex)
-  (let ((bigint (parseInt (hex.substring 1) 16)))
-    (list (/ (bitwise-and (bitwise-rshift bigint 16) 255) 255)
-		  (/ (bitwise-and (bitwise-rshift bigint 8) 255) 255)
-		  (/ (bitwise-and bigint 255) 255))))
+(define (remove-colour type)
+  (cond
+   ((eq? type "warp")
+	(when (> (length warp-colours) 1) 
+		  (let ((el ($ (dbg (string-append "#colour-" type "-" (- (length warp-colours) 1) "-div")))))
+			(el.remove)
+			(set! warp-colours (reverse (cdr (reverse warp-colours)))))))
+   (else
+	(when (> (length weft-colours) 1) 
+		  (let ((el ($ (string-append "#colour-" type "-" (- (length weft-colours) 1) "-div"))))
+			(el.remove)
+			(set! weft-colours (reverse (cdr (reverse weft-colours))))))))
+  (update))
 
 (define (update-colour c)
   (let ((ss (c.id.split "-")))
 	(let ((type (list-ref ss 1))
 		  (id (string->number (list-ref ss 2))))
-	  (msg id)
+	  ;;(msg c.value)
+	  ;;(msg (hex->colour c.value))
+
 	  (if (eq? type "warp")
 		  (set! warp-colours
 				(list-replace
@@ -153,6 +192,7 @@
 				(list-replace
 				 weft-colours id
 				 (hex->colour c.value))))
-	  (update))))
+	  (update)
+	  )))
 		 
 

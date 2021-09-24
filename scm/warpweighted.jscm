@@ -41,6 +41,7 @@
   (setup-draft-interface
    (read-number "warp-threads")
    (read-number "weft-threads"))
+  (setup-colour-interface)  
   (write-draft-interface
    (list (list 0 1 0 1)
 		 (list 1 0 1 0)
@@ -54,7 +55,6 @@
 					(length weft-colours))))
 
 	(set! scene-root (build-locator))
-	(setup-colour-interface)  
 	(update-look)  
 	(update-view)  
 	(with-state
