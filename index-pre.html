@@ -4,10 +4,11 @@
 	<title>Penelope warpweighted loom 2.0</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link href="css/style.css" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" href="css/flickity.css">
   </head>
   <body>
 	<div class="container">
-	  <div class="left">
+	  <div class="row">
 		
 		<div class="controls">
 		  
@@ -86,32 +87,51 @@
 -->
 		  
 		</div> <!-- controls -->
-		
-		<button type="button" class="collapsible">+ fine tune</button>
-		<div class="collapsible-content">
-		  <table>	  
-			<tr><td>Thread width</td><td><input type="number" id="thread-width" value='0.8' onchange="update_look();" style="width:5em;"/></td></tr>
-			<tr><td>Weave depth</td><td><input type="number" id="weave-depth" value='0.2' onchange="update_look();" style="width:5em;"/></td></tr>
-			<tr><td>Fabric warp size</td><td><input type="number" id="fabric-warp-size" value='20' onchange="update();" style="width:5em;"/></td></tr>
-			<tr><td>Fabric weft size</td><td><input type="number" id="fabric-weft-size" value='12' onchange="update();" style="width:5em;"/></td></tr>
-			<tr><td>Texture</td><td><input type="checkbox" checked id="render-texture" onchange="update_look();" style="width:5em;"/></td></tr>
-			<tr><td>Flat</td><td><input type="checkbox" checked id="render-flat" onchange="update_look();" style="width:5em;"/></td></tr>
-			<tr><td>Contrast</td><td><input type="number" id="render-contrast" value="0.5" onchange="update_look();" style="width:5em;"/></td></tr>
-		  </table>
-		  
-		  <table>
-			<tr><td>Loom speed</td><td><input type="number" id="loom-speed" value='0.01' onchange="update_speed();" style="width:5em;"/></td></tr>
-			<tr><td>X rotation</td><td><input type="number" id="camera-rot-x" value='0' onchange="update_view();" style="width:5em;"/></td></tr>
-			<tr><td>Y rotation</td><td><input type="number" id="camera-rot-y" value='-20' onchange="update_view();" style="width:5em;"/></td></tr>
-			<tr><td>Distance</td><td><input type="number" id="camera-distance" value='49' onchange="update_view();" style="width:5em;"/></td></tr>
-		  </table>
-		</div>
-		
-	  </div> <!-- left -->
-	  
+
       <div class="sim-container">
 		<canvas class="canvas" id="webgl-canvas" width="509" height="400"></canvas>
-		<canvas class="canvas" id="canvas" width="509" height="400"></canvas> 
+<!--		<canvas class="canvas" id="canvas" width="509" height="400"></canvas> -->
+	  </div>
+
+
+	  </div> <!-- row -->
+		
+	  <button type="button" class="collapsible" style="display:none">+ fine tune</button>
+	  <div class="collapsible-content">
+		<table>	  
+		  <tr><td>Thread width</td><td><input type="number" id="thread-width" value='0.8' onchange="update_look();" style="width:5em;"/></td></tr>
+		  <tr><td>Weave depth</td><td><input type="number" id="weave-depth" value='0.2' onchange="update_look();" style="width:5em;"/></td></tr>
+		  <tr><td>Fabric warp size</td><td><input type="number" id="fabric-warp-size" value='20' onchange="update();" style="width:5em;"/></td></tr>
+		  <tr><td>Fabric weft size</td><td><input type="number" id="fabric-weft-size" value='12' onchange="update();" style="width:5em;"/></td></tr>
+		  <tr><td>Texture</td><td><input type="checkbox" checked id="render-texture" onchange="update_look();" style="width:5em;"/></td></tr>
+		  <tr><td>Flat</td><td><input type="checkbox" checked id="render-flat" onchange="update_look();" style="width:5em;"/></td></tr>
+		  <tr><td>Contrast</td><td><input type="number" id="render-contrast" value="0.5" onchange="update_look();" style="width:5em;"/></td></tr>
+		</table>
+		
+		<table>
+		  <tr><td>Loom speed</td><td><input type="number" id="loom-speed" value='0.01' onchange="update_speed();" style="width:5em;"/></td></tr>
+		  <tr><td>X rotation</td><td><input type="number" id="camera-rot-x" value='0' onchange="update_view();" style="width:5em;"/></td></tr>
+		  <tr><td>Y rotation</td><td><input type="number" id="camera-rot-y" value='-20' onchange="update_view();" style="width:5em;"/></td></tr>
+		  <tr><td>Distance</td><td><input type="number" id="camera-distance" value='49' onchange="update_view();" style="width:5em;"/></td></tr>
+		</table>
+	  </div>
+  
+	  
+	  
+	  
+	  <div class="carousel" data-flickity='{ "cellAlign": "left", "contain": true, "wrapAround": true }' >		
+		<div class="carousel-cell">
+		  <div class="carousel-contents">
+			<div class="carousel-left"><h1>PENELOPE warp weighted loom simulation</h1></div>
+			<div class="carousel-right">Text about stuff</div>
+		  </div>
+		</div>
+		<div class="carousel-cell">
+		  <div class="carousel-contents">
+			<div class="carousel-left"><h1>Something else</h1></div>
+			<div class="carousel-right">Text about stuff</div>
+		  </div>
+		</div>
 	  </div>
 	  
 	  <div class="code-container" style="display: none;">
@@ -130,6 +150,7 @@
   <script src="flx/js/glObjLoader.js"></script>
   <script src="flx/js/glPlyLoader.js"></script>
   <script src="flx/js/ditto.js"></script>
+  <script src="js/flickity.pkgd.min.js"></script>
   <script>
     $( document ).ready(function() {
 	init_resources({{RESOURCES}});

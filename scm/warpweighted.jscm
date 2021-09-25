@@ -123,11 +123,11 @@
   (set! frame (+ frame 1)))
 
 
-(canvas-setup)
+;;(canvas-setup)
 (clear-colour (vector 1 1 1))
 (set-camera-angle 25)
 (set-camera-transform (mtranslate (midentity) (vector 0 1 (- (read-number "camera-distance")))))
-(resize-canvas canvas)
+;;(resize-canvas canvas)
 (resize-glcanvas webgl-canvas)
 
 ;; todo: this isn't working, it's using the default-default shader
