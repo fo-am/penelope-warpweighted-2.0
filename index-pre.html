@@ -40,6 +40,10 @@
 				</div>
 			  </div>
 			  <div id="draft"></div>
+			  <div class="row">
+				<input type="number" id="warp-threads" value='4' onchange="update_draft();" style="width:3em;"/> x
+				<input type="number" id="weft-threads" value='4' onchange="update_draft();" style="width:3em;"/>
+			  </div>
 			</div>
 
 			<div class="weft-container">
@@ -62,10 +66,6 @@
 
 		  </div> <!-- row -->
 
-		  <div class="row">
-			<input type="number" id="warp-threads" value='4' onchange="update_draft();" style="width:3em;"/> x
-			<input type="number" id="weft-threads" value='4' onchange="update_draft();" style="width:3em;"/>
-		  </div>
 
 		  <!--
 			  <button id="invert" onclick="invert_draft();">Invert</button>
@@ -109,29 +109,200 @@
 		</table>
 		
 		<table>
-		  <tr><td>Loom speed</td><td><input type="number" id="loom-speed" value='0.01' onchange="update_speed();" style="width:5em;"/></td></tr>
+		  <tr><td>Loom speed</td><td><input type="number" id="loom-speed" value='0.001' onchange="update_speed();" style="width:5em;"/></td></tr>
 		  <tr><td>X rotation</td><td><input type="number" id="camera-rot-x" value='0' onchange="update_view();" style="width:5em;"/></td></tr>
 		  <tr><td>Y rotation</td><td><input type="number" id="camera-rot-y" value='-20' onchange="update_view();" style="width:5em;"/></td></tr>
 		  <tr><td>Distance</td><td><input type="number" id="camera-distance" value='49' onchange="update_view();" style="width:5em;"/></td></tr>
 		</table>
 	  </div>
   
-	  
+	  <!-- 
+		   wwl : weavers of ancient greece were digital
+           pm : we use it with a tangible interface
+           can you figure out how to make these patterns?
+           horizontal stripes
+           vertical stripes - show interfence system
+		   twill
+		   satin
+		   basket
+
+		-->
 	  
 	  
 	  <div class="carousel" data-flickity='{ "cellAlign": "left", "contain": true, "wrapAround": true }' >		
 		<div class="carousel-cell">
 		  <div class="carousel-contents">
-			<div class="carousel-left"><h1>PENELOPE warp weighted loom simulation</h1></div>
-			<div class="carousel-right">Text about stuff</div>
+			<div class="carousel-left">
+			  <h2>PENELOPE warp weighted loom simulation</h2>
+			  <p>
+				Warp weighted looms were used by the ancient Greeks.
+				This explorable explanation demonstrates how weavers
+				in ancient times calculated complex algorithmic
+				pattern manipulation which shows that digital
+				thinking has a long history.
+			  </p>
+			  <p>
+				This is a small collection of weaving patterns for you
+				to explore - can you figure them all out?
+			  </p>
+			</div>
+			<div>
+			  <img src="images/example.jpg" width="300">
+			</div>
 		  </div>
 		</div>
+
 		<div class="carousel-cell">
 		  <div class="carousel-contents">
-			<div class="carousel-left"><h1>Something else</h1></div>
-			<div class="carousel-right">Text about stuff</div>
+			<div class="carousel-left">
+			  <h2>Plain weave</h2>
+			  <p>
+				The default checkerboard pattern being woven above is
+				plain weave (also known as tabby) and is the simplest,
+				and strongest weave.
+			  </p>
+			  <p>
+				Can you click on the light brown squares to change the
+				warp and weft colours to create these horizontal
+				stripes?
+			  </p>
+			</div>
+			<div>
+			  <button type="button" class="collapsible">See the answer</button>
+			  <div class="collapsible-content" style="display:none;">
+				<img src="images/tabby-ans.png" width="300">
+			  </div>
+			  <div class="uncollapsible-content"  style="display:flex;">
+				<img src="images/tabby-pat.png" width="300">
+			  </div>
+			  
+			</div>
 		  </div>
 		</div>
+
+		<div class="carousel-cell">
+		  <div class="carousel-contents">
+			<div class="carousel-left">
+			  <h2>Plain weave 2</h2>
+			  <p>
+				This is a example of how an interference between
+				colour and structure create visual patterns in
+				weaving. Can you work out how to change the colour
+				order to make the stripes go in the other direction
+				like this?
+			  </p>
+			</div>
+			<div>
+			  <button type="button" class="collapsible">See the answer</button>
+			  <div class="collapsible-content" style="display:none;">
+				<img src="images/tabby2-ans.png" width="300">
+			  </div>
+			  <div class="uncollapsible-content"  style="display:flex;">
+				<img src="images/tabby2-pat.png" width="300">
+			  </div>			  
+			</div>
+		  </div>
+		</div>
+
+		<div class="carousel-cell">
+		  <div class="carousel-contents">
+			<div class="carousel-left">
+			  <h2>Gingham</h2>
+			  <p>
+				Gingham is a type of plaid pattern made with plain
+				weave which is used all around the world in different
+				cultures. 
+			  </p>
+			  <p>
+				Can you decypher this mystery and replicate it for
+				yourself?
+			  </p>
+			</div>
+			<div>
+			  <button type="button" class="collapsible">See the answer</button>
+			  <div class="collapsible-content" style="display:none;">
+				<img src="images/gingham-ans.png" width="300">
+			  </div>
+			  <div class="uncollapsible-content"  style="display:flex;">
+				<img src="images/gingham-pat.png" width="300">
+			  </div>
+			  
+			</div>
+		  </div>
+		</div>
+
+
+		<div class="carousel-cell">
+		  <div class="carousel-contents">
+			<div class="carousel-left">
+			  <h2>Basket weave</h2>
+			  <p>
+				Lets try changing the weave 'draft pattern' in the
+				middle. The pattern on the right shows a development
+				of plan weave known as basket weave.
+			  </p>
+			  <p>
+				Can you work out how it's made?
+			  </p>
+			</div>
+			<div>
+			  <button type="button" class="collapsible">See the answer</button>
+			  <div class="collapsible-content" style="display:none;">
+				<img src="images/basket-ans.png" width="300">
+			  </div>
+			  <div class="uncollapsible-content"  style="display:flex;">
+				<img src="images/basket-pat.png" width="300">
+			  </div>			  
+			</div>
+		  </div>
+		</div>
+
+		<div class="carousel-cell">
+		  <div class="carousel-contents">
+			<div class="carousel-left">
+			  <h2>Basket weave 2</h2>
+			  <p>
+				Interestingly, basket weave often creates diagonal
+				patterns when you alternate the colour threads, can
+				you replicate the one on the right?
+			  </p>
+			</div>
+			<div>
+			  <button type="button" class="collapsible">See the answer</button>
+			  <div class="collapsible-content" style="display:none;">
+				<img src="images/basket2-ans.png" width="300">
+			  </div>
+			  <div class="uncollapsible-content"  style="display:flex;">
+				<img src="images/basket2-pat.png" width="300">
+			  </div>			  
+			</div>
+		  </div>
+		</div>
+		
+		<div class="carousel-cell">
+		  <div class="carousel-contents">
+			<div class="carousel-left">
+			  <h2>Houndstooth</h2>
+			  <p>
+				This famous pattern is called Houndstooth (also
+				dogstooth, dogtooth, dog's tooth, or pied-de-poule) and
+				is often used in fashion. 
+			  </p>
+			</div>
+			<div>
+			  <button type="button" class="collapsible">See the answer</button>
+			  <div class="collapsible-content" style="display:none;">
+				<img src="images/houndstooth-ans.png" width="300">
+			  </div>
+			  <div class="uncollapsible-content"  style="display:flex;">
+				<img src="images/houndstooth-pat.png" width="300">
+			  </div>
+			  
+			</div>
+		  </div>
+		</div>
+
+
 	  </div>
 	  
 	  <div class="code-container" style="display: none;">
@@ -163,10 +334,20 @@ for (i = 0; i < coll.length; i++) {
   coll[i].addEventListener("click", function() {
     this.classList.toggle("active");
     var content = this.nextElementSibling;
-    if (content.style.display === "flex") {
+				console.log(content)
+				console.log(content.style.display)
+	if (content.style.display === "flex") {			
       content.style.display = "none";
     } else {
       content.style.display = "flex";
+    }
+	var content2 = content.nextElementSibling;
+	console.log(content2)			
+	console.log(content2.style.display)
+	if (content2.style.display === "flex") {
+      content2.style.display = "none";
+    } else {
+      content2.style.display = "flex";
     }
   });
 } 
