@@ -8,96 +8,77 @@
   </head>
   <body>
 	<div class="container">
-	  <div class="row">
-		
+	  <div class="top-row">		
 		<div class="controls">
-		  
-		  <div class="row">
-			<div class="warp-container">
-			  <div class="dropdown">
-				<span>?</span>
-				<div class="dropdown-content">
-				  Here you can choose warp (vertical) thread colours
-				  and add and remove threads to change the warp colour
-				  sequence.
-				</div>
-			  </div>
-			  <div id="warp-colours"></div>
-			  <div class="col">
-				<button class="yarn-button" onclick="add_colour('warp');">+</button>
-				<button class="yarn-button" onclick="remove_colour('warp');">-</button>
+
+		  <div class="warp-container">
+			<div class="dropdown">
+			  <span>?</span>
+			  <div class="dropdown-content">
+				Here you can choose warp (vertical) thread colours
+				and add and remove threads to change the warp colour
+				sequence.
 			  </div>
 			</div>
+			<div id="warp-colours"></div>
+			<div class="col">
+			  <button class="yarn-button" onclick="add_colour('warp');">+</button>
+			  <button class="yarn-button" onclick="remove_colour('warp');">-</button>
+			</div>
+		  </div>
 
-			<div class="draft-container">
-			  <div class="dropdown">
-				<span>?</span>
-				<div class="dropdown-content">
-				  This pattern (known as the draft pattern) describes
-				  the structure of the weave. Black indicates warp
-				  (vertical) threads will go over weft (horizontal)
-				  threads, white is the inverse.
-				</div>
-			  </div>
-			  <div id="draft"></div>
-			  <div class="row">
-				<input type="number" id="warp-threads" value='4' onchange="update_draft();" style="width:3em;"/> x
-				<input type="number" id="weft-threads" value='4' onchange="update_draft();" style="width:3em;"/>
+		  <div class="draft-container">
+			<div class="dropdown">
+			  <span>?</span>
+			  <div class="dropdown-content">
+				This pattern (known as the draft pattern) describes
+				the structure of the weave. Black indicates warp
+				(vertical) threads will go over weft (horizontal)
+				threads, white is the inverse.
 			  </div>
 			</div>
+			<div id="draft"></div>
+			<div class="controls">
+			  <input type="number" id="warp-threads" value='4' onchange="update_draft();" style="width:3em;"/> x
+			  <input type="number" id="weft-threads" value='4' onchange="update_draft();" style="width:3em;"/>
+			</div>
+		  </div>
 
-			<div class="weft-container">
-			  <div class="dropdown">
-				<span>?</span>
-				<div class="dropdown-content">
-				  Here you can choose weft (horizontal) thread colours
-				  and add and remove threads to change the weft colour
-				  sequence.
-				</div>
-			  </div>
-			  <div id="weft-colours"></div>
-			  <div class="row">
-				<button class="yarn-button" onclick="add_colour('weft');">+</button>
-				<button class="yarn-button" onclick="remove_colour('weft');">-</button>
+		  <div class="weft-container">
+			<div class="dropdown">
+			  <span>?</span>
+			  <div class="dropdown-content">
+				Here you can choose weft (horizontal) thread colours
+				and add and remove threads to change the weft colour
+				sequence.
 			  </div>
 			</div>
+			<div id="weft-colours"></div>
+			<div class="row">
+			  <button class="yarn-button" onclick="add_colour('weft');">+</button>
+			  <button class="yarn-button" onclick="remove_colour('weft');">-</button>
+			</div>
+		  </div>
 
-			<h1>=</h1>
+		  <h1>=</h1>
 
-		  </div> <!-- row -->
-
-
-		  <!--
-			  <button id="invert" onclick="invert_draft();">Invert</button>
-			  <button id="clear" onclick="clear_draft();">Clear</button>
-			  -->
-
-<!--		<div class="custom-select">
-		  <select>
-			<option value="#637a8f">&nbsp;</option>
-			<option value="#637a8f">light woad</option>
-			<option value="#445a8a">dark woad</option>
-			<option value="#574e5e">oak gall</option>
-			<option value="#a11939">dark madder</option>
-			<option value="#de9170">light madder</option>
-			<option value="#eae82b">light weld</option>
-			<option value="#929240">dark weld</option>
-		  </select>
-		</div>
--->
-		  
 		</div> <!-- controls -->
 
-      <div class="sim-container">
-		<canvas class="canvas" id="webgl-canvas" width="509" height="400"></canvas>
-<!--		<canvas class="canvas" id="canvas" width="509" height="400"></canvas> -->
-	  </div>
 
+		<!--
+			<button id="invert" onclick="invert_draft();">Invert</button>
+			<button id="clear" onclick="clear_draft();">Clear</button>
+			-->
 
-	  </div> <!-- row -->
+		<div class="sim-container">
+		  <canvas class="canvas" id="webgl-canvas" width="509" height="400"></canvas>
+		</div>
 		
+	  </div> <!-- row -->
+
+
 	  <button type="button" class="collapsible" style="display:none">+ fine tune</button>
-	  <div class="collapsible-content">
+	  <div class="collapsible-content" style="display:none">
 		<table>	  
 		  <tr><td>Thread width</td><td><input type="number" id="thread-width" value='0.8' onchange="update_look();" style="width:5em;"/></td></tr>
 		  <tr><td>Weave depth</td><td><input type="number" id="weave-depth" value='0.2' onchange="update_look();" style="width:5em;"/></td></tr>
@@ -116,22 +97,12 @@
 		</table>
 	  </div>
   
-	  <!-- 
-		   wwl : weavers of ancient greece were digital
-           pm : we use it with a tangible interface
-           can you figure out how to make these patterns?
-           horizontal stripes
-           vertical stripes - show interfence system
-		   twill
-		   satin
-		   basket
-
-		-->
-	  
-	  
+	  	  
 	  <div class="carousel" data-flickity='{ "cellAlign": "left", "contain": true, "wrapAround": true }' >		
+
 		<div class="carousel-cell">
 		  <div class="carousel-contents">
+
 			<div class="carousel-left">
 			  <h2>PENELOPE warp weighted loom simulation</h2>
 			  <p>
@@ -143,14 +114,16 @@
 			  </p>
 			  <p>
 				This is a small collection of weaving patterns for you
-				to explore - can you figure them all out?
+				to explore - can you figure them all out? 
 			  </p>
 			</div>
-			<div>
-			  <img src="images/example.jpg" width="300">
+			<div class="carousel-right">
+			  <img src="images/example.jpg">
 			</div>
+
 		  </div>
 		</div>
+
 
 		<div class="carousel-cell">
 		  <div class="carousel-contents">
@@ -164,19 +137,19 @@
 			  <p>
 				Can you click on the light brown squares to change the
 				warp and weft colours to create these horizontal
-				stripes?
+				stripes? Click on the ? button if you want to see the
+				answer.
 			  </p>
 			</div>
-			<div>
-			  <button type="button" class="collapsible">See the answer</button>
+			<div class="carousel-right">
+			  <button type="button" class="collapsible">?</button>
 			  <div class="collapsible-content" style="display:none;">
-				<img src="images/tabby-ans.png" width="300">
+				<img src="images/tabby-ans.png">
 			  </div>
 			  <div class="uncollapsible-content"  style="display:flex;">
-				<img src="images/tabby-pat.png" width="300">
-			  </div>
-			  
-			</div>
+				<img src="images/tabby-pat.png">
+			  </div>			  
+			</div>	
 		  </div>
 		</div>
 
@@ -192,15 +165,16 @@
 				like this?
 			  </p>
 			</div>
-			<div>
-			  <button type="button" class="collapsible">See the answer</button>
+			<div class="carousel-right">
+			  <button type="button" class="collapsible">?</button>
 			  <div class="collapsible-content" style="display:none;">
-				<img src="images/tabby2-ans.png" width="300">
+				<img src="images/tabby2-ans.png">
 			  </div>
 			  <div class="uncollapsible-content"  style="display:flex;">
-				<img src="images/tabby2-pat.png" width="300">
+				<img src="images/tabby2-pat.png" class="pat-image">
 			  </div>			  
-			</div>
+			</div>	
+			
 		  </div>
 		</div>
 
@@ -218,16 +192,17 @@
 				yourself?
 			  </p>
 			</div>
-			<div>
-			  <button type="button" class="collapsible">See the answer</button>
+
+			<div class="carousel-right">
+			  <button type="button" class="collapsible">?</button>
 			  <div class="collapsible-content" style="display:none;">
-				<img src="images/gingham-ans.png" width="300">
+				<img src="images/gingham-ans.png">
 			  </div>
 			  <div class="uncollapsible-content"  style="display:flex;">
-				<img src="images/gingham-pat.png" width="300">
-			  </div>
-			  
-			</div>
+				<img src="images/gingham-pat.png">
+			  </div>			  
+			</div>	
+
 		  </div>
 		</div>
 
@@ -245,15 +220,17 @@
 				Can you work out how it's made?
 			  </p>
 			</div>
-			<div>
-			  <button type="button" class="collapsible">See the answer</button>
+
+			<div class="carousel-right">
+			  <button type="button" class="collapsible">?</button>
 			  <div class="collapsible-content" style="display:none;">
-				<img src="images/basket-ans.png" width="300">
+				<img src="images/basket-ans.png">
 			  </div>
 			  <div class="uncollapsible-content"  style="display:flex;">
-				<img src="images/basket-pat.png" width="300">
+				<img src="images/basket-pat.png">
 			  </div>			  
-			</div>
+			</div>	
+
 		  </div>
 		</div>
 
@@ -267,15 +244,17 @@
 				you replicate the one on the right?
 			  </p>
 			</div>
-			<div>
-			  <button type="button" class="collapsible">See the answer</button>
+
+			<div class="carousel-right">
+			  <button type="button" class="collapsible">?</button>
 			  <div class="collapsible-content" style="display:none;">
-				<img src="images/basket2-ans.png" width="300">
+				<img src="images/basket2-ans.png">
 			  </div>
 			  <div class="uncollapsible-content"  style="display:flex;">
-				<img src="images/basket2-pat.png" width="300">
+				<img src="images/basket2-pat.png">
 			  </div>			  
-			</div>
+			</div>	
+
 		  </div>
 		</div>
 		
@@ -289,22 +268,24 @@
 				is often used in fashion. 
 			  </p>
 			</div>
-			<div>
-			  <button type="button" class="collapsible">See the answer</button>
+
+			<div class="carousel-right">
+			  <button type="button" class="collapsible">?</button>
 			  <div class="collapsible-content" style="display:none;">
-				<img src="images/houndstooth-ans.png" width="300">
+				<img src="images/houndstooth-ans.png">
 			  </div>
 			  <div class="uncollapsible-content"  style="display:flex;">
-				<img src="images/houndstooth-pat.png" width="300">
-			  </div>
-			  
-			</div>
+				<img src="images/houndstooth-pat.png">
+			  </div>			  
+			</div>	
 		  </div>
 		</div>
 
+		
 
-	  </div>
-	  
+
+	  </div> <!-- carousel -->
+
 	  <div class="code-container" style="display: none;">
 		<textarea id="code"></textarea>
 		output

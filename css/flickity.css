@@ -110,7 +110,7 @@ https://flickity.metafizzy.co
 
 .flickity-page-dots {
   position: absolute;
-  width: 100%;
+  width: 95%;
   /* bottom: -25px; */
   bottom: 0px;
   /*padding: 0;*/
@@ -118,6 +118,9 @@ https://flickity.metafizzy.co
   list-style: none;
   text-align: center;
   line-height: 1;
+  margin: 0;
+  margin-block-start: 0;
+  margin-block-end: 0;
 }
 
 .flickity-rtl .flickity-page-dots { direction: rtl; }

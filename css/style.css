@@ -2,7 +2,6 @@ body {
 	font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
     padding: 0;
     margin: 0;
-    overflow: hidden;
 }
 
 input {
@@ -78,8 +77,14 @@ label {
 
 .row {
 	display: flex;
-	flex-direction: row;
+	flex-direction: column;
 	align-items: center;
+}
+
+@media (min-width: 800px) {
+	.row {
+		flex-direction: row;
+	}
 }
 
 .col {
@@ -87,6 +92,34 @@ label {
 	flex-direction: column;
 	align-items: center;
 }
+
+.top-row {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	border-bottom: 1px solid black;
+}
+
+@media (min-width: 800px) {
+	.top-row {
+		flex-direction: row;
+	}
+}
+
+.controls {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	flex: 1;
+	justify-content: center;
+}
+
+@media (min-width: 500px) {
+	.controls {
+		flex-direction: row;
+	}
+}
+
 
 .warp-container {
 	margin: 1em;
@@ -129,13 +162,6 @@ label {
 	flex-direction: column;
 }
 
-.controls {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	flex: 1;
-}
-
 .draft-checkbox {
 	width: 1em;
 }
@@ -163,6 +189,20 @@ label {
 	display: flex;
 	flex-direction: column;
 }
+
+.row {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+@media (min-width: 800px) {
+	.row {
+		flex-direction: row;
+	}
+}
+
+
 
 /* Customize the label (the container) */
 .draft-check {
@@ -231,11 +271,12 @@ label {
 
  /* Style the button that is used to open and close the collapsible content */
 .collapsible {
-	text-align: left;
-	width: 10em;
 	border: none;
-	background: none;
-	padding: 0;
+	border-radius: 50%;
+	width: 2em;
+	height: 2em;
+	color: white;	
+	background: black;
 }
 
 /* Style the collapsible content. Note: hidden by default */
@@ -247,6 +288,7 @@ label {
 .uncollapsible-content {
 	flex-direction: row;
 	display: flex;
+	overflow: hidden;
 } 
 
 .dropdown {
@@ -335,30 +377,59 @@ label {
   background-color: rgba(0, 0, 0, 0.1);
 } 
 
-
 .carousel-cell {
-  width: 100%;
-  height: 220px; 
-  margin-right: 10px;
-  border-radius: 5px;
-  counter-increment: carousel-cell;
-  overflow: hidden;
+	width: 100%;
+	counter-increment: carousel-cell;
+	overflow: hidden;
 }
 
 .carousel-contents {
 	margin-left: 5em;
 	margin-right: 5em;
 	display: flex;
-	flex-direction: row;
+	flex-direction: column;
+}
+
+@media (min-width: 800px) {
+	.carousel-contents {
+		flex-direction: row;
+	}
+}
+
+.carousel-contents div {
+	width: 100%
+}
+
+@media (min-width: 800px) {
+	.carousel-contents div {
+
+	}
 }
 
 .carousel-left {
-	width: 50%;
 	overflow: hidden;
-	margin-right: 5em;
+	margin-right: 1em;
+}
+
+@media (min-width: 800px) {
+	.carousel-left {
+		margin-left: 0;
+	}
 }
 
 .carousel-right {
-	width: 50%;
-	margin-left: 5em;
+	position: relative;
+	margin-left: 1em;
+	display: flex;
+	align-content: center;
+	align-items: center;
+	overflow: hidden;
 }
+
+@media (min-width: 800px) {
+	.carousel-right {
+		margin-left: 0;
+	}
+}
+
+
