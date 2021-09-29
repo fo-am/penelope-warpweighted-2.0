@@ -31,11 +31,11 @@
 (define frame 0)
 
 ;   (list (list 0 0 1 0 1 1)
-;		 (list 1 0 0 1 1 0)
-;		 (list 0 1 0 1 0 1)
-;		 (list 1 0 1 0 1 0)
-;		 (list 0 1 1 0 0 1)
-;		 (list 1 1 0 1 0 0))
+;  	 	  (list 1 0 0 1 1 0)
+;		  (list 0 1 0 1 0 1)
+;		  (list 1 0 1 0 1 0)
+;		  (list 0 1 1 0 0 1)
+;		  (list 1 1 0 1 0 0))
 
 (define (init)
   (setup-draft-interface
@@ -50,22 +50,27 @@
   (build))
 
 (define (build)  
-  (let ((weft-size (make-divisible-by-wefts
-					(read-number "fabric-weft-size")
-					(length weft-colours))))
-
-	(set! scene-root (build-locator))
-	(update-look)  
-	(update-view)  
-	(with-state
-	 (parent scene-root)
-	 (translate (vector 0 (- weft-size 12) 0))
-	 (set! l (build-loom
-			  (read-draft-interface)
-			  (read-number "fabric-warp-size")
-			  weft-size
-			  warp-colours
-			  weft-colours)))))
+  (let ((draft (read-draft-interface)))
+	;; annoying need to precalculate
+	;; corrected fabric size to fit draft and weft
+	;; before the loom is created
+	(let ((corrected-size
+		   (make-divisible-by-wefts
+			(make-divisible-by-wefts
+			 (read-number "fabric-weft-size") (length draft))
+			(length weft-colours))))
+	  (set! scene-root (build-locator))
+	  (update-look)  
+	  (update-view)  
+	  (with-state
+	   (parent scene-root)
+	   (translate (vector 0 (- corrected-size 12) 0))
+	   (set! l (build-loom
+				(read-draft-interface)
+				(read-number "fabric-warp-size")
+				(read-number "fabric-weft-size")
+				warp-colours
+				weft-colours))))))
 
 (define (update)
   (destroy scene-root)

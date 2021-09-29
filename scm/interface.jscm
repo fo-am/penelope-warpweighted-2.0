@@ -72,7 +72,7 @@
 		'()
 		(cons (read-row (- (read-number "weft-threads") 1) y)
 			  (read-col (- y 1)))))
-  (dbg (read-col (- (read-number "warp-threads") 1))))
+  (read-col (- (read-number "warp-threads") 1)))
 
 (define (write-draft-interface draft)
   (define (write-row x y)

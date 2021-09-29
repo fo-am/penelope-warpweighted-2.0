@@ -45,9 +45,11 @@
 (define (build-loom draft warp-threads weft-threads warp-colours weft-colours)
   (let ((root (build-locator))
 		(weft-threads
-		 (max (make-divisible-by-wefts weft-threads (length weft-colours))
-			  (make-divisible-by-wefts weft-threads (dbg (length (car draft)))))))
-    (with-state
+		 (make-divisible-by-wefts
+		  (make-divisible-by-wefts
+		   weft-threads (length draft))
+		  (length weft-colours))))	
+	(with-state
      (shader-assign-compiled "default")  
      (parent root)
      (make-loom
@@ -203,7 +205,6 @@
 
 
 	 ((eq? state "read")
-	  (msg "read")
 	  (loom-modify-state
 	   (loom-update-draft 
 		l (read-draft-interface)
@@ -248,7 +249,7 @@
   (let ((weft-threads
 		 (make-divisible-by-wefts
 		  weft-threads
-		  (dbg (length (car draft))))))
+		  (length draft))))
 	(loom-modify-draft
 	 (loom-modify-weft
 	  (loom-modify-warp
