@@ -378,6 +378,7 @@ label {
 
 .carousel-cell {
 	width: 100%;
+	min-height: 220px;
 	counter-increment: carousel-cell;
 	overflow: hidden;
 }
