@@ -20,8 +20,8 @@
 (load "scm/constructor.jscm")
 (load "scm/components.jscm")
 
-(define (make-loom draft warp weft state t root weft-count)
-  (list draft warp weft state t root weft-count))
+(define (make-loom draft warp weft state t root weft-count warp-threads warp-pos)
+  (list draft warp weft state t root weft-count warp-threads warp-pos))
 
 (define (loom-draft l) (list-ref l 0))
 (define (loom-modify-draft l v) (list-replace l 0 v))
@@ -36,12 +36,17 @@
 (define (loom-root l) (list-ref l 5))
 (define (loom-weft-count l) (list-ref l 6))
 (define (loom-modify-weft-count l v) (list-replace l 6 v))
+(define (loom-warp-threads l) (list-ref l 7))
+(define (loom-warp-pos l) (list-ref l 8))
+(define (loom-modify-warp-pos l v) (list-replace l 8 v))
 
 ;; ----------------------------------------------------------
 
 (define (build-loom draft warp-threads weft-threads warp-colours weft-colours)
   (let ((root (build-locator))
-		(weft-threads (make-divisible-by-wefts weft-threads (length weft-colours))))
+		(weft-threads
+		 (max (make-divisible-by-wefts weft-threads (length weft-colours))
+			  (make-divisible-by-wefts weft-threads (dbg (length (car draft)))))))
     (with-state
      (shader-assign-compiled "default")  
      (parent root)
@@ -72,6 +77,8 @@
       "filling-warp"
       0
       root
+	  0
+	  warp-threads
 	  0))))
 
 (define (loom-step-warp l components)
@@ -106,18 +113,20 @@
 (define (loom-step-weft-n l components n)
   (if (zero? n)
 	  l
-	  (loom-step-weft-n 
-	   (loom-modify-weft
-		l (list-replace
-		   (loom-weft l)
-		   (loom-weft-count l) 
-		   (with-state
-			(parent (loom-root l))
-			(constructor-step
-			 (list-ref (loom-weft l) (loom-weft-count l))
-			 components))))
-	   components (- n 1))))
-
+	  (loom-step-weft-n
+	   (loom-modify-warp-pos
+		(loom-modify-weft
+		 l (list-replace
+			(loom-weft l)
+			(loom-weft-count l) 
+			(with-state
+			 (parent (loom-root l))
+			 (constructor-step
+			  (list-ref (loom-weft l) (loom-weft-count l))
+			  components))))
+		(+ (loom-warp-pos l) 1))
+		components (- n 1))))
+  
 (define move-time 1)
 (define weave-time 0.05)
 
@@ -179,34 +188,19 @@
 		   (loom-modify-t
 			(let ((step (constructor-next-instr (list-ref (loom-weft l) (loom-weft-count l)))))
 			  ;;(msg (list "w" (loom-weft-count l) step (constructor-pc (list-ref (loom-weft l) (loom-weft-count l)))))
-			  (if (loom-selvedge-step? step)
-				  (if (< (loom-weft-count l) (- (length (loom-weft l)) 1))
-					  (loom-modify-weft-count
-					   l (+ (loom-weft-count l) 1))
-					  (loom-modify-weft-count
-					   (loom-modify-state l "selvedge") 0))
+			  (if (> (loom-warp-pos l) (loom-warp-threads l))
+				  (loom-modify-warp-pos
+				   (if (< (loom-weft-count l) (- (length (loom-weft l)) 1))
+					   (loom-modify-weft-count
+						l (+ (loom-weft-count l) 1))
+					   (loom-modify-weft-count
+						(loom-modify-state l "read") 0))
+				   0)
 				  l))   
 			0)
-		   components 1)
+		   components 2)
 		  (loom-modify-t l (+ (loom-t l) d))))
 
-	 ((eq? state "selvedge")
-      (if (> (loom-t l) weave-time)
-		  (loom-step-weft 
-		   (loom-modify-t
-			(let ((step (constructor-next-instr (list-ref (loom-weft l) (loom-weft-count l)))))
-			  ;;(msg (list "s" (loom-weft-count l) step (constructor-pc (list-ref (loom-weft l) (loom-weft-count l)))))
-			  ;;(msg (loom-weft l))
-			  (if (loom-not-selvedge-step? step)
-				  (if (< (loom-weft-count l) (- (length (loom-weft l)) 1))
-					  (loom-modify-weft-count
-					   l (+ (loom-weft-count l) 1))
-					  (loom-modify-weft-count
-					   (loom-modify-state l "read") 0))
-				  l))   
-			0)
-		   components)
-		  (loom-modify-t l (+ (loom-t l) d))))
 
 	 ((eq? state "read")
 	  (msg "read")
@@ -224,27 +218,52 @@
        (loom-root l)
        (translate (vector 0 (* d (length (loom-weft l))) 0)) ;; one unit per second
        (if (> (loom-t l) move-time)
-		   (loom-modify-state l "warping")
+		   (loom-modify-state l "selvedge")
 		   (loom-modify-t l (+ (loom-t l) d)))))
+
+
+	 ((eq? state "selvedge")
+      (if (> (loom-t l) weave-time)
+		  (loom-step-weft 
+		   (loom-modify-t
+			(let ((step (constructor-next-instr (list-ref (loom-weft l) (loom-weft-count l)))))
+			  ;;(msg (list "s" (loom-weft-count l) step (constructor-pc (list-ref (loom-weft l) (loom-weft-count l)))))
+			  ;;(msg (loom-weft l))
+			  (if (loom-not-selvedge-step? step)
+				  (if (< (loom-weft-count l) (- (length (loom-weft l)) 1))
+					  (loom-modify-weft-count
+					   l (+ (loom-weft-count l) 1))
+					  (loom-modify-weft-count
+					   (loom-modify-state l "warping") 0))
+				  l))   
+			0)
+		   components)
+		  (loom-modify-t l (+ (loom-t l) d))))
+
+	 
      (else l))))
 
 
 (define (loom-update-draft l draft warp-threads weft-threads)
-  (loom-modify-draft
-   (loom-modify-weft
-    (loom-modify-warp
-     l (index-map
-		(lambda (i e)
-		  (constructor-modify-code
-		   e (kernel->warp-thread draft i weft-threads)))
-		(loom-warp l)))
-    (index-map
-     (lambda (i e)
-       (constructor-modify-code
-		e (kernel->weft-thread
-		   draft i warp-threads weft-threads
-		   (length (loom-weft l)))))
-	 (loom-weft l)))
-   draft))
+  (let ((weft-threads
+		 (make-divisible-by-wefts
+		  weft-threads
+		  (dbg (length (car draft))))))
+	(loom-modify-draft
+	 (loom-modify-weft
+	  (loom-modify-warp
+	   l (index-map
+		  (lambda (i e)
+			(constructor-modify-code
+			 e (kernel->warp-thread draft i weft-threads)))
+		  (loom-warp l)))
+	  (index-map
+	   (lambda (i e)
+		 (constructor-modify-code
+		  e (kernel->weft-thread
+			 draft i warp-threads weft-threads
+			 (length (loom-weft l)))))
+	   (loom-weft l)))
+	 draft)))
 
 
