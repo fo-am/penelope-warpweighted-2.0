@@ -167,7 +167,7 @@
 	   (list-ref weft (- (length weft) 1))
 	   (list-ref weft 0)))))
 
-(define (_kernel->weft-thread kernel row fabric-width fabric-height selvedge-size)
+(define (_kernel->weft-thread kernel row fabric-width fabric-height selvedge-size c)
   (cond
    ((>= row fabric-height) '())
    (else
@@ -186,8 +186,8 @@
 	   (_kernel->weft-thread
 		kernel
 		(+ row selvedge-size)
-		fabric-width fabric-height selvedge-size))))))
+		fabric-width fabric-height selvedge-size (+ c 1)))))))
 
 (define (kernel->weft-thread kernel row fabric-width fabric-height selvedge-size)
   (tension-selvedge
-   (_kernel->weft-thread kernel row fabric-width fabric-height selvedge-size)))
+   (_kernel->weft-thread kernel row fabric-width fabric-height selvedge-size 0)))

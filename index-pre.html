@@ -83,7 +83,7 @@
 		  <tr><td>Thread width</td><td><input type="number" id="thread-width" value='0.8' onchange="update_look();" style="width:5em;"/></td></tr>
 		  <tr><td>Weave depth</td><td><input type="number" id="weave-depth" value='0.2' onchange="update_look();" style="width:5em;"/></td></tr>
 		  <tr><td>Fabric warp size</td><td><input type="number" id="fabric-warp-size" value='20' onchange="update();" style="width:5em;"/></td></tr>
-		  <tr><td>Fabric weft size</td><td><input type="number" id="fabric-weft-size" value='12' onchange="update();" style="width:5em;"/></td></tr>
+		  <tr><td>Fabric weft size</td><td><input type="number" id="fabric-weft-size" value='14' onchange="update();" style="width:5em;"/></td></tr>
 		  <tr><td>Texture</td><td><input type="checkbox" checked id="render-texture" onchange="update_look();" style="width:5em;"/></td></tr>
 		  <tr><td>Flat</td><td><input type="checkbox" checked id="render-flat" onchange="update_look();" style="width:5em;"/></td></tr>
 		  <tr><td>Contrast</td><td><input type="number" id="render-contrast" value="0.5" onchange="update_look();" style="width:5em;"/></td></tr>
@@ -472,16 +472,12 @@ for (i = 0; i < coll.length; i++) {
   coll[i].addEventListener("click", function() {
     this.classList.toggle("active");
     var content = this.nextElementSibling;
-				console.log(content)
-				console.log(content.style.display)
 	if (content.style.display === "flex") {			
       content.style.display = "none";
     } else {
       content.style.display = "flex";
     }
 	var content2 = content.nextElementSibling;
-	console.log(content2)			
-	console.log(content2.style.display)
 	if (content2.style.display === "flex") {
       content2.style.display = "none";
     } else {

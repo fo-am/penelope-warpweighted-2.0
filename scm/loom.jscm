@@ -49,7 +49,9 @@
 		 (make-divisible-by-wefts
 		  (make-divisible-by-wefts
 		   weft-threads (length draft))
-		  (length weft-colours))))	
+		  (length weft-colours))))
+	
+	(msg weft-threads)
 	(with-state
      (shader-assign-compiled "default")  
      (parent root)
@@ -156,7 +158,8 @@
       (if (< (constructor-pc (car (loom-weft l)))
 			 (- (length (constructor-code (car (loom-weft l)))) 1))
 		  (loom-step-weft-all l components)
-		  (loom-modify-state l "warping")))
+		  (loom-modify-state
+		   (loom-step-weft-all l components) "warping")))
 	 
 	 ((eq? state "warping")
       (if (> (loom-t l) weave-time)		  
@@ -190,9 +193,7 @@
 	   (loom-update-draft 
 		l (read-draft-interface)
 		(read-number "fabric-warp-size")
-		(make-divisible-by-wefts
-		 (read-number "fabric-weft-size")
-		 (length (loom-weft l))))
+		(read-number "fabric-weft-size"))
 	   "moving"))
 	 
 	 ((eq? state "moving")
@@ -223,8 +224,9 @@
 (define (loom-update-draft l draft warp-threads weft-threads)
   (let ((weft-threads
 		 (make-divisible-by-wefts
-		  weft-threads
-		  (length draft))))
+		  (make-divisible-by-wefts
+		   weft-threads (length draft))
+		  (length weft-colours))))
 	(loom-modify-draft
 	 (loom-modify-weft
 	  (loom-modify-warp

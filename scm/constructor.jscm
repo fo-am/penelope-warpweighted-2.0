@@ -93,7 +93,9 @@
   (cond
    ((> (length (constructor-prims c))
        ;; we assume every code has a shape associated with it here
-       (* (length (constructor-code c)) 2))
+	   ;; leave slight overlap so remove is hidden at the top of the
+	   ;; screen
+       (* (length (constructor-code c)) 1.5))
     (destroy (car (constructor-prims c)))
     (constructor-modify-prims c (cdr (constructor-prims c))))
    (else c)))
