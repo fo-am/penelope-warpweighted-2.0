@@ -4,7 +4,7 @@ import base64
 # stuff all the scheme code into the ditto js file
 # so that it can be loaded locally
 
-pre = "index-pre.html"
+pre = "index-t-pre.html"
 target = "index.html"
 
 # more time and I would go through searching for loads to
