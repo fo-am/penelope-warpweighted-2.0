@@ -43,10 +43,11 @@
    (read-number "weft-threads"))
   (setup-colour-interface)  
   (write-draft-interface
-   (list (list 0 1 0 1)
-		 (list 1 0 1 0)
-		 (list 0 1 0 1)
-		 (list 1 0 1 0)))
+   (list (list 0 0 0 0 0)
+		 (list 0 0 0 0 0)
+		 (list 0 0 0 0 0)
+		 (list 0 0 0 0 0)
+		 (list 0 0 0 0 0)))
   (build))
 
 (define (build)  

@@ -3,7 +3,7 @@
   <head>
 	<title>Penelope warpweighted loom 2.0</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link href="css/style.css" rel="stylesheet" type="text/css">
+	<link href="css/style-t.css" rel="stylesheet" type="text/css">
 	<link rel="stylesheet" href="css/flickity.css">
   </head>
   <body>
@@ -39,8 +39,8 @@
 			</div>
 			<div id="draft"></div>
 			<div class="controls">
-			  <input type="number" id="warp-threads" value='4' onchange="update_draft();" style="width:3em;"/> x
-			  <input type="number" id="weft-threads" value='4' onchange="update_draft();" style="width:3em;"/>
+			  <input type="number" id="warp-threads" value='5' onchange="update_draft();" style="width:3em;"/> x
+			  <input type="number" id="weft-threads" value='5' onchange="update_draft();" style="width:3em;"/>
 			</div>
 		  </div>
 
@@ -225,10 +225,11 @@ ret\n\
    (read-number "weft-threads"))\n\
   (setup-colour-interface)  \n\
   (write-draft-interface\n\
-   (list (list 0 1 0 1)\n\
-		 (list 1 0 1 0)\n\
-		 (list 0 1 0 1)\n\
-		 (list 1 0 1 0)))\n\
+   (list (list 0 0 0 0 0)\n\
+		 (list 0 0 0 0 0)\n\
+		 (list 0 0 0 0 0)\n\
+		 (list 0 0 0 0 0)\n\
+		 (list 0 0 0 0 0)))\n\
   (build))\n\
 \n\
 (define (build)  \n\
