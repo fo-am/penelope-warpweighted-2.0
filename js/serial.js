@@ -62,16 +62,44 @@ function update_from_pm(codes) {
 	}
 
 	if (trigger) {
-		write_draft_interface([
+		if (read_number("warp-threads")==5 &&
+			read_number("weft-threads")==5) {
+			write_draft_interface([				
+				[pm_s[20],pm_s[15],pm_s[10],pm_s[5],pm_s[0]],
+				[pm_s[21],pm_s[16],pm_s[11],pm_s[6],pm_s[1]],
+				[pm_s[22],pm_s[17],pm_s[12],pm_s[7],pm_s[2]],
+				[pm_s[23],pm_s[18],pm_s[13],pm_s[8],pm_s[3]],
+				[pm_s[24],pm_s[19],pm_s[14],pm_s[9],pm_s[4]],
+			]);
+		}
 
-			[pm_s[20],pm_s[15],pm_s[10],pm_s[5],pm_s[0]],
-			[pm_s[21],pm_s[16],pm_s[11],pm_s[6],pm_s[1]],
-			[pm_s[22],pm_s[17],pm_s[12],pm_s[7],pm_s[2]],
-			[pm_s[23],pm_s[18],pm_s[13],pm_s[8],pm_s[3]],
-			[pm_s[24],pm_s[19],pm_s[14],pm_s[9],pm_s[4]],
+		if (read_number("warp-threads")==4 &&
+			read_number("weft-threads")==4) {
+			write_draft_interface([				
+				[pm_s[15],pm_s[10],pm_s[5],pm_s[0]],
+				[pm_s[16],pm_s[11],pm_s[6],pm_s[1]],
+				[pm_s[17],pm_s[12],pm_s[7],pm_s[2]],
+				[pm_s[18],pm_s[13],pm_s[8],pm_s[3]],				
+			]);
+		}
 
-		]);
-		
+		if (read_number("warp-threads")==3 &&
+			read_number("weft-threads")==3) {
+			write_draft_interface([				
+				[pm_s[10],pm_s[5],pm_s[0]],
+				[pm_s[11],pm_s[6],pm_s[1]],
+				[pm_s[12],pm_s[7],pm_s[2]],
+			]);
+		}
+
+		if (read_number("warp-threads")==2 &&
+			read_number("weft-threads")==2) {
+			write_draft_interface([				
+				[pm_s[5],pm_s[0]],
+				[pm_s[6],pm_s[1]],
+			]);
+		}
+
 	}	
 }
 
